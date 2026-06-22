@@ -60,20 +60,38 @@ tr:last-child td{border-bottom:none;}
 .panel{padding:14px 20px;}
 .panel+.panel{border-left:0.5px solid #eee;}
 .ptitle{font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#bbb;margin-bottom:10px;}
-.oil-row{display:flex;align-items:flex-start;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid #f5f5f5;gap:8px;}
+/* OIL TRACKER */
+.oil-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid #f5f5f5;}
 .oil-row:last-child{border-bottom:none;}
-.owho{font-size:12px;font-weight:500;color:#111;}
-.odet{font-size:10px;color:#bbb;margin-top:1px;}
-.st{font-size:9px;padding:2px 8px;border-radius:999px;font-weight:500;white-space:nowrap;flex-shrink:0;}
-.s-p{background:#FEF3C7;color:#92400E;border:0.5px solid #FCD34D;}
-.s-s{background:#DBEAFE;color:#1E40AF;border:0.5px solid #93C5FD;}
+.oil-avatar{width:28px;height:28px;border-radius:50%;background:#f0f0f0;border:0.5px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#555;flex-shrink:0;}
+.oil-main{flex:1;min-width:0;}
+.oil-name{font-size:12px;font-weight:500;color:#111;}
+.oil-detail{font-size:10px;color:#bbb;margin-top:1px;}
+.oil-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.st{font-size:9px;padding:2px 8px;border-radius:999px;font-weight:500;white-space:nowrap;}
+.s-p{background:#FAEEDA;color:#633806;border:0.5px solid #EF9F27;}
+.s-s{background:#E6F1FB;color:#0C447C;border:0.5px solid #85B7EB;}
 .s-c{background:#D1FAE5;color:#065F46;border:0.5px solid #6EE7B7;}
+.s-o{background:#FCEBEB;color:#A32D2D;border:0.5px solid #F09595;}
+.del-btn{background:transparent;border:0.5px solid #eee;color:#ccc;font-size:10px;padding:2px 7px;border-radius:4px;cursor:pointer;font-family:inherit;display:none;}
+.del-btn:hover{border-color:#f09595;color:#b91c1c;}
+.edit-active-mode .del-btn{display:block;}
+.hist-toggle{font-size:10px;color:#bbb;cursor:pointer;padding:8px 0 4px;display:flex;align-items:center;gap:4px;user-select:none;border:none;background:transparent;font-family:inherit;}
+.hist-toggle:hover{color:#888;}
+.hist-section{border-top:0.5px solid #f0f0f0;margin-top:4px;padding-top:4px;display:none;}
+.hist-section.open{display:block;}
+.hist-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid #f8f8f8;}
+.hist-row:last-child{border-bottom:none;}
+.hist-name{font-size:11px;font-weight:500;color:#888;flex:1;}
+.hist-detail{font-size:10px;color:#ccc;}
+.es{font-size:12px;color:#d0d0d0;padding:8px 0;}
+/* COVERAGE */
 .cv-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid #f5f5f5;}
 .cv-row:last-child{border-bottom:none;}
 .cv-day{font-size:11px;font-weight:500;color:#111;}
 .cv-ok{font-size:9px;padding:2px 7px;border-radius:999px;background:#f5f5f5;color:#999;}
 .cv-warn{font-size:9px;padding:2px 7px;border-radius:999px;background:#FEE2E2;color:#991B1B;border:0.5px solid #FECACA;}
-.es{font-size:12px;color:#d0d0d0;padding:8px 0;}
+/* MODALS */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:1000;}
 .overlay.hidden{display:none;}
 .modal{background:#fff;border-radius:12px;padding:24px;width:320px;max-width:90vw;border:0.5px solid #e0e0e0;box-shadow:0 8px 32px rgba(0,0,0,0.12);}
@@ -89,7 +107,7 @@ select:focus,input:focus{border-color:#666;background:#fff;}
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app" id="app">
   <div id="seed-banner">Setting up for first use — importing roster data, please wait…</div>
   <div class="masthead">
     <div class="brand">
@@ -127,8 +145,8 @@ select:focus,input:focus{border-color:#666;background:#fff;}
     <table><thead id="t-head"></thead><tbody id="t-body"></tbody></table>
   </div>
   <div class="panels">
-    <div class="panel">
-      <div class="ptitle">OIL tracker</div>
+    <div class="panel" id="oil-panel">
+      <div class="ptitle">OIL tracker — active only</div>
       <div id="oil-content"><div class="es">Loading…</div></div>
     </div>
     <div class="panel">
@@ -174,117 +192,313 @@ select:focus,input:focus{border-color:#666;background:#fff;}
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore,doc,setDoc,getDoc,onSnapshot,writeBatch } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore,doc,setDoc,getDoc,onSnapshot,writeBatch,updateDoc,arrayUnion,arrayRemove }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const ADMIN_PIN='2026';
 const FB={apiKey:"AIzaSyAyJXftlJ1RwWH0We24O4QRlXuyN-ED47Q",authDomain:"surgo-duty-roster.firebaseapp.com",projectId:"surgo-duty-roster",storageBucket:"surgo-duty-roster.firebasestorage.app",messagingSenderId:"792788823180",appId:"1:792788823180:web:53934b69faa9cc78751fa9"};
+
 const STAFF=['Zhihong','Jianhao','Farrah','Fir','Rafillah'];
 const DAYS=['mon','tue','wed','thu','fri','sat','sun'];
 const DN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-const PH={'2026-05-18':'Labour Day (sub)','2026-05-19':'Hari Raya Haji (sub)','2026-05-27':'Hari Raya Haji','2026-05-31':'Vesak Day','2026-06-01':'Vesak Day (sub)','2026-08-09':'National Day','2026-10-20':'Deepavali','2026-12-25':'Christmas Day'};
+
+// SG 2026 gazetted PHs — paired means Sunday+Monday sub = 1 OIL max
+const PH_EVENTS=[
+  {name:"New Year's Day",dates:['2026-01-01']},
+  {name:"Chinese New Year",dates:['2026-02-17']},
+  {name:"Chinese New Year (Day 2)",dates:['2026-02-18']},
+  {name:"Hari Raya Puasa",dates:['2026-03-21']},
+  {name:"Good Friday",dates:['2026-04-03']},
+  {name:"Labour Day",dates:['2026-05-01']},
+  {name:"Hari Raya Haji",dates:['2026-05-27']},
+  {name:"Vesak Day",dates:['2026-05-31','2026-06-01']},
+  {name:"National Day",dates:['2026-08-09','2026-08-10']},
+  {name:"Deepavali",dates:['2026-11-08','2026-11-09']},
+  {name:"Christmas Day",dates:['2026-12-25']},
+];
+
+// For column header labels
+const PH_LABELS={
+  '2026-01-01':"New Year's Day",
+  '2026-02-17':"Chinese New Year",
+  '2026-02-18':"Chinese New Year",
+  '2026-03-21':"Hari Raya Puasa",
+  '2026-04-03':"Good Friday",
+  '2026-05-01':"Labour Day",
+  '2026-05-27':"Hari Raya Haji",
+  '2026-05-31':"Vesak Day",
+  '2026-06-01':"Vesak Day (sub)",
+  '2026-08-09':"National Day",
+  '2026-08-10':"National Day (sub)",
+  '2026-11-08':"Deepavali",
+  '2026-11-09':"Deepavali (sub)",
+  '2026-12-25':"Christmas Day",
+};
+
 const MIG={
-'2026-05-11':{Zhihong:{mon:'OFF',tue:'Chalet',wed:'Chalet',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'OFF'}},
-'2026-05-18':{Zhihong:{mon:'OFF',tue:'OFF',wed:'OFF',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'Chalet'},Jianhao:{mon:'Office',tue:'Chalet',wed:'Chalet',thu:'Chalet',fri:'OFF',sat:'OFF',sun:'Chalet'},Farrah:{mon:'SAS',tue:'OFF',wed:'SAS',thu:'SAS',fri:'SAS',sat:'Chalet',sun:'OFF'}},
-'2026-05-25':{Zhihong:{mon:'Chalet',tue:'OFF',wed:'Chalet',thu:'Chalet',fri:'Chalet',sat:'OFF',sun:'Chalet'},Jianhao:{mon:'Chalet',tue:'Chalet',wed:'OFF',thu:'Office',fri:'Office',sat:'Chalet',sun:'OFF'},Farrah:{mon:'SAS',tue:'SAS',wed:'OFF',thu:'SAS',fri:'SAS',sat:'OFF',sun:'Chalet'}},
-'2026-06-01':{Zhihong:{mon:'Chalet',tue:'Chalet',wed:'Chalet',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'OFF'},Jianhao:{mon:'Chalet',tue:'OFF',wed:'Office',thu:'Chalet',fri:'Office',sat:'OFF',sun:'Chalet'},Farrah:{mon:'OFF',tue:'SAS',wed:'SAS',thu:'SAS',fri:'SAS',sat:'Chalet',sun:'OFF'}},
-'2026-06-08':{Zhihong:{mon:'Office',tue:'Chalet',wed:'OFF',thu:'Chalet',fri:'Chalet',sat:'OIL',sun:'OFF'},Jianhao:{mon:'Office',tue:'OFF',wed:'Chalet',thu:'Office',fri:'OFF',sat:'Chalet',sun:'Chalet'},Farrah:{mon:'SAS',tue:'SAS',wed:'SAS',thu:'SAS',fri:'OFF',sat:'OFF',sun:'OIL'}},
-'2026-06-15':{Zhihong:{mon:'Chalet',tue:'Chalet',wed:'OFF',thu:'Chalet',fri:'Chalet',sat:'Chalet',sun:'OFF'},Jianhao:{mon:'OFF',tue:'Office',wed:'Chalet',thu:'Office',fri:'Office',sat:'OIL',sun:'OFF'},Farrah:{mon:'OFF',tue:'SAS',wed:'SAS',thu:'SAS',fri:'SAS',sat:'OFF',sun:'Chalet'}},
-'2026-06-22':{Zhihong:{mon:'Chalet',tue:'OFF',wed:'Chalet',thu:'Chalet',fri:'Chalet',sat:'OFF',sun:'Chalet'},Jianhao:{mon:'OFF',tue:'Office',wed:'Office',thu:'Office',fri:'Office',sat:'Chalet',sun:'OFF'},Farrah:{mon:'SAS',tue:'SAS',wed:'SAS',thu:'SAS',fri:'Office',sat:'OFF',sun:'OFF'}},
-'2026-06-29':{Zhihong:{mon:'Chalet',tue:'Office',wed:'Office',thu:'Chalet',fri:'Chalet',sat:'OFF',sun:'OFF'},Jianhao:{mon:'Office',tue:'Office',wed:'OFF',thu:'Office',fri:'Office',sat:'OFF',sun:'Chalet'},Farrah:{mon:'OFF',tue:'SAS',wed:'SAS',thu:'SAS',fri:'SAS',sat:'Chalet',sun:'OFF'}},
-'2026-07-06':{Zhihong:{mon:'Chalet',tue:'Office',wed:'Chalet',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'OFF'},Jianhao:{mon:'Office',tue:'Office',wed:'Office',thu:'Office',fri:'Office',sat:'OFF',sun:'OFF'},Farrah:{mon:'SAS',tue:'SAS',wed:'SAS',thu:'SAS',fri:'OFF',sat:'OFF',sun:'Chalet'}},
-'2026-07-13':{Zhihong:{mon:'Chalet',tue:'Chalet',wed:'Chalet',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'OFF'},Jianhao:{mon:'Office',tue:'OFF',wed:'Office',thu:'Chalet',fri:'Office',sat:'OFF',sun:'Chalet'},Farrah:{mon:'SAS',tue:'SAS',wed:'SAS',thu:'SAS',fri:'Office',sat:'OFF',sun:'OFF'}},
-'2026-07-20':{Zhihong:{mon:'Chalet',tue:'Chalet',wed:'Chalet',thu:'Chalet',fri:'OFF',sat:'OFF',sun:'Leave'}},
-'2026-07-27':{Zhihong:{mon:'OFF',tue:'OFF',wed:'Chalet',thu:'Chalet',fri:'Chalet',sat:'Chalet',sun:'Chalet'}}
+  '2026-05-11':{Zhihong:{mon:'OFF',tue:'Chalet',wed:'Chalet',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'OFF'}},
+  '2026-05-18':{Zhihong:{mon:'OFF',tue:'OFF',wed:'OFF',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'Chalet'},Jianhao:{mon:'Office',tue:'Chalet',wed:'Chalet',thu:'Chalet',fri:'OFF',sat:'OFF',sun:'Chalet'},Farrah:{mon:'SAS',tue:'OFF',wed:'SAS',thu:'SAS',fri:'SAS',sat:'Chalet',sun:'OFF'}},
+  '2026-05-25':{Zhihong:{mon:'Chalet',tue:'OFF',wed:'Chalet',thu:'Chalet',fri:'Chalet',sat:'OFF',sun:'Chalet'},Jianhao:{mon:'Chalet',tue:'Chalet',wed:'OFF',thu:'Office',fri:'Office',sat:'Chalet',sun:'OFF'},Farrah:{mon:'SAS',tue:'SAS',wed:'OFF',thu:'SAS',fri:'SAS',sat:'OFF',sun:'Chalet'}},
+  '2026-06-01':{Zhihong:{mon:'Chalet',tue:'Chalet',wed:'Chalet',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'OFF'},Jianhao:{mon:'Chalet',tue:'OFF',wed:'Office',thu:'Chalet',fri:'Office',sat:'OFF',sun:'Chalet'},Farrah:{mon:'OFF',tue:'SAS',wed:'SAS',thu:'SAS',fri:'SAS',sat:'Chalet',sun:'OFF'}},
+  '2026-06-08':{Zhihong:{mon:'Office',tue:'Chalet',wed:'OFF',thu:'Chalet',fri:'Chalet',sat:'OIL',sun:'OFF'},Jianhao:{mon:'Office',tue:'OFF',wed:'Chalet',thu:'Office',fri:'OFF',sat:'Chalet',sun:'Chalet'},Farrah:{mon:'SAS',tue:'SAS',wed:'SAS',thu:'SAS',fri:'OFF',sat:'OFF',sun:'OIL'}},
+  '2026-06-15':{Zhihong:{mon:'Chalet',tue:'Chalet',wed:'OFF',thu:'Chalet',fri:'Chalet',sat:'Chalet',sun:'OFF'},Jianhao:{mon:'OFF',tue:'Office',wed:'Chalet',thu:'Office',fri:'Office',sat:'OIL',sun:'OFF'},Farrah:{mon:'OFF',tue:'SAS',wed:'SAS',thu:'SAS',fri:'SAS',sat:'OFF',sun:'Chalet'}},
+  '2026-06-22':{Zhihong:{mon:'Chalet',tue:'OFF',wed:'Chalet',thu:'Chalet',fri:'Chalet',sat:'OFF',sun:'Chalet'},Jianhao:{mon:'OFF',tue:'Office',wed:'Office',thu:'Office',fri:'Office',sat:'Chalet',sun:'OFF'},Farrah:{mon:'SAS',tue:'SAS',wed:'SAS',thu:'SAS',fri:'Office',sat:'OFF',sun:'OFF'}},
+  '2026-06-29':{Zhihong:{mon:'Chalet',tue:'Office',wed:'Office',thu:'Chalet',fri:'Chalet',sat:'OFF',sun:'OFF'},Jianhao:{mon:'Office',tue:'Office',wed:'OFF',thu:'Office',fri:'Office',sat:'OFF',sun:'Chalet'},Farrah:{mon:'OFF',tue:'SAS',wed:'SAS',thu:'SAS',fri:'SAS',sat:'Chalet',sun:'OFF'}},
+  '2026-07-06':{Zhihong:{mon:'Chalet',tue:'Office',wed:'Chalet',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'OFF'},Jianhao:{mon:'Office',tue:'Office',wed:'Office',thu:'Office',fri:'Office',sat:'OFF',sun:'OFF'},Farrah:{mon:'SAS',tue:'SAS',wed:'SAS',thu:'SAS',fri:'OFF',sat:'OFF',sun:'Chalet'}},
+  '2026-07-13':{Zhihong:{mon:'Chalet',tue:'Chalet',wed:'Chalet',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'OFF'},Jianhao:{mon:'Office',tue:'OFF',wed:'Office',thu:'Chalet',fri:'Office',sat:'OFF',sun:'Chalet'},Farrah:{mon:'SAS',tue:'SAS',wed:'SAS',thu:'SAS',fri:'Office',sat:'OFF',sun:'OFF'}},
+  '2026-07-20':{Zhihong:{mon:'Chalet',tue:'Chalet',wed:'Chalet',thu:'Chalet',fri:'OFF',sat:'OFF',sun:'Leave'}},
+  '2026-07-27':{Zhihong:{mon:'OFF',tue:'OFF',wed:'Chalet',thu:'Chalet',fri:'Chalet',sat:'Chalet',sun:'Chalet'}},
 };
 
 const fbApp=initializeApp(FB);
 const db=getFirestore(fbApp);
 let curWeek=getMon(new Date());
 let cache={};
+let dismissed=new Set();
 let editMode=false;
 let editTarget=null;
 let unsub=null;
+let histOpen=false;
 
 function getMon(d){const r=new Date(d);const wd=r.getDay();r.setDate(r.getDate()+(wd===0?-6:1-wd));r.setHours(0,0,0,0);return r;}
-function wk(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),dd=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${dd}`;}
+function wk(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${dd}`;}
 function addD(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
-function iso(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),dd=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${dd}`;}
+function iso(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${dd}`;}
 function disp(d){return d.toLocaleDateString('en-SG',{day:'numeric',month:'short'});}
 function isToday(d){const t=new Date();return d.getDate()===t.getDate()&&d.getMonth()===t.getMonth()&&d.getFullYear()===t.getFullYear();}
+function initials(name){return name.slice(0,2).toUpperCase();}
 
 async function loadWk(mon){const k=wk(mon);const s=await getDoc(doc(db,'roster',k));cache[k]=s.exists()?s.data():{};}
-function subWk(mon){if(unsub)unsub();unsub=onSnapshot(doc(db,'roster',wk(mon)),s=>{cache[wk(mon)]=s.exists()?s.data():{};renderGrid();renderCov();setSynced('synced');},()=>setSynced('error'));}
+function subWk(mon){if(unsub)unsub();unsub=onSnapshot(doc(db,'roster',wk(mon)),s=>{cache[wk(mon)]=s.exists()?s.data():{};renderGrid();renderCov();renderOIL();setSynced('synced');},()=>setSynced('error'));}
 async function saveShift(weekKey,staff,day,loc,note){setSynced('saving');await setDoc(doc(db,'roster',weekKey),{[`${staff}_${day}`]:loc,[`${staff}_${day}_note`]:note||''},{merge:true});}
-async function seedIfEmpty(){const s=await getDoc(doc(db,'roster','2026-06-22'));if(s.exists())return;document.getElementById('seed-banner').style.display='block';const batch=writeBatch(db);for(const[k,sd] of Object.entries(MIG)){const flat={};for(const[staff,days] of Object.entries(sd))for(const[day,v] of Object.entries(days)){flat[`${staff}_${day}`]=v;flat[`${staff}_${day}_note`]='';}batch.set(doc(db,'roster',k),flat);}await batch.commit();document.getElementById('seed-banner').style.display='none';}
+
+async function loadDismissed(){
+  const s=await getDoc(doc(db,'oilMeta','dismissed'));
+  dismissed=new Set(s.exists()?(s.data().ids||[]):[]);
+}
+async function dismissOIL(id){
+  dismissed.add(id);
+  await setDoc(doc(db,'oilMeta','dismissed'),{ids:Array.from(dismissed)},{merge:true});
+  renderOIL();
+}
+
+async function seedIfEmpty(){
+  const s=await getDoc(doc(db,'roster','2026-06-22'));
+  if(s.exists())return;
+  document.getElementById('seed-banner').style.display='block';
+  const batch=writeBatch(db);
+  for(const[k,sd] of Object.entries(MIG)){
+    const flat={};
+    for(const[staff,days] of Object.entries(sd))
+      for(const[day,v] of Object.entries(days)){flat[`${staff}_${day}`]=v;flat[`${staff}_${day}_note`]='';}
+    batch.set(doc(db,'roster',k),flat);
+  }
+  await batch.commit();
+  document.getElementById('seed-banner').style.display='none';
+}
 
 function getShift(weekKey,staff,day){const d=cache[weekKey]||{};return{loc:d[`${staff}_${day}`]||'',note:d[`${staff}_${day}_note`]||''};}
 function badge(loc,note){if(!loc)return'<span class="empty">–</span>';const cls={Chalet:'bc',SAS:'bs',Office:'bo',OFF:'bx',Leave:'bl',OIL:'bi'}[loc]||'bx';const nd=note?` <span class="ndot" title="${note.replace(/"/g,"'")}">·</span>`:'';return`<span class="badge ${cls}">${loc}</span>${nd}`;}
 
-function renderHdr(){const sun=addD(curWeek,6);document.getElementById('week-label').textContent=`${disp(curWeek)} – ${disp(sun)} ${curWeek.getFullYear()}`;let h='<tr><th class="sc">Staff</th>';for(let i=0;i<7;i++){const d=addD(curWeek,i);const ph=PH[iso(d)];const td=isToday(d);h+=`<th class="${td?'tc':''}">${DN[i]}<span class="th-d">${disp(d)}</span>${td?'<span class="th-t">Today</span>':''}${ph?`<span class="th-p">${ph}</span>`:''}</th>`;}h+='</tr>';document.getElementById('t-head').innerHTML=h;}
+function renderHdr(){
+  const sun=addD(curWeek,6);
+  document.getElementById('week-label').textContent=`${disp(curWeek)} – ${disp(sun)} ${curWeek.getFullYear()}`;
+  let h='<tr><th class="sc">Staff</th>';
+  for(let i=0;i<7;i++){
+    const d=addD(curWeek,i);const ph=PH_LABELS[iso(d)];const td=isToday(d);
+    h+=`<th class="${td?'tc':''}">${DN[i]}<span class="th-d">${disp(d)}</span>${td?'<span class="th-t">Today</span>':''}${ph?`<span class="th-p">${ph}</span>`:''}</th>`;
+  }
+  h+='</tr>';
+  document.getElementById('t-head').innerHTML=h;
+}
 
-function renderGrid(){const k=wk(curWeek);let h='';for(const staff of STAFF){h+=`<tr><td class="sn">${staff}</td>`;for(let i=0;i<7;i++){const d=addD(curWeek,i);const day=DAYS[i];const{loc,note}=getShift(k,staff,day);const cls=[isToday(d)?'tc':'',editMode?'editable':''].filter(Boolean).join(' ');h+=`<td class="${cls}" data-staff="${staff}" data-day="${day}">${badge(loc,note)}</td>`;}h+='</tr>';}document.getElementById('t-body').innerHTML=h;if(editMode){document.querySelectorAll('#t-body td[data-staff]').forEach(td=>{td.addEventListener('click',()=>openEdit(td.dataset.staff,td.dataset.day));});}}
+function renderGrid(){
+  const k=wk(curWeek);let h='';
+  for(const staff of STAFF){
+    h+=`<tr><td class="sn">${staff}</td>`;
+    for(let i=0;i<7;i++){
+      const d=addD(curWeek,i);const day=DAYS[i];
+      const{loc,note}=getShift(k,staff,day);
+      const cls=[isToday(d)?'tc':'',editMode?'editable':''].filter(Boolean).join(' ');
+      h+=`<td class="${cls}" data-staff="${staff}" data-day="${day}">${badge(loc,note)}</td>`;
+    }
+    h+='</tr>';
+  }
+  document.getElementById('t-body').innerHTML=h;
+  if(editMode)document.querySelectorAll('#t-body td[data-staff]').forEach(td=>{td.addEventListener('click',()=>openEdit(td.dataset.staff,td.dataset.day));});
+}
 
-function renderOIL(){
+// ── OIL COMPUTATION ──────────────────────────────────────────────────────────
+function computeOIL(){
   const today=new Date();
-  // Collect OIL dates per staff
-  const oilByStaff={};
+  const records=[];
+
+  for(const event of PH_EVENTS){
+    const earnedDate=new Date(event.dates[0]);
+    if(earnedDate>today)continue;
+    const deadline=new Date(earnedDate);
+    deadline.setMonth(deadline.getMonth()+1);
+
+    for(const staff of STAFF){
+      let worked=false;
+      for(const phDate of event.dates){
+        const phD=new Date(phDate);
+        const phMon=getMon(phD);const phWk=wk(phMon);
+        const data=cache[phWk];if(!data)continue;
+        const dayIdx=phD.getDay()===0?6:phD.getDay()-1;
+        const day=DAYS[dayIdx];
+        const loc=data[`${staff}_${day}`];
+        if(loc&&loc!=='OFF'&&loc!=='Leave'&&loc!==''){worked=true;break;}
+      }
+      if(worked){
+        records.push({
+          id:`${staff}||${event.name}||${event.dates[0]}`,
+          staff,event:event.name,earnedDate,deadline,
+          oilDate:null,status:today>deadline?'overdue':'pending'
+        });
+      }
+    }
+  }
+
+  // Collect all OIL entries from roster, sorted chronologically
+  const allOIL=[];
   for(const[k,data] of Object.entries(cache)){
     const mon=new Date(k);
     for(const staff of STAFF){
       for(let i=0;i<7;i++){
         if(data[`${staff}_${DAYS[i]}`]==='OIL'){
-          const d=addD(mon,i);
-          if(!oilByStaff[staff])oilByStaff[staff]=[];
-          oilByStaff[staff].push(d);
+          allOIL.push({staff,date:addD(mon,i)});
         }
       }
     }
   }
-  // Collect PHs worked per staff (grouped)
-  const earnedByStaff={};
-  for(const[phISO,phName] of Object.entries(PH)){
-    const phD=new Date(phISO);
-    if(phD>today)continue;
-    const phMon=getMon(phD);const phWk=wk(phMon);
-    const data=cache[phWk];if(!data)continue;
-    const dayIdx=phD.getDay()===0?6:phD.getDay()-1;
-    const day=DAYS[dayIdx];
-    for(const staff of STAFF){
-      const loc=data[`${staff}_${day}`];
-      if(loc&&loc!=='OFF'&&loc!=='Leave'&&loc!==''){
-        if(!earnedByStaff[staff])earnedByStaff[staff]=[];
-        earnedByStaff[staff].push({phISO,phName});
-      }
+  allOIL.sort((a,b)=>a.date-b.date);
+
+  // Match OIL entries to earned records (earliest unmatched first)
+  for(const oilEntry of allOIL){
+    const match=records.find(r=>r.staff===oilEntry.staff&&r.oilDate===null&&oilEntry.date>r.earnedDate);
+    if(match){
+      match.oilDate=oilEntry.date;
+      match.status=oilEntry.date<today?'cleared':'scheduled';
     }
   }
-  const entries=Object.entries(earnedByStaff);
-  if(entries.length===0){document.getElementById('oil-content').innerHTML='<div class="es">No OIL records found</div>';return;}
-  let h='';
-  for(const[staff,earned] of entries){
-    const oilDates=(oilByStaff[staff]||[]).sort((a,b)=>a-b);
-    const total=earned.length;
-    const cleared=oilDates.filter(d=>d<today).length;
-    const upcoming=oilDates.filter(d=>d>=today);
-    const pending=Math.max(0,total-oilDates.length);
-    let sc,st;
-    if(pending>0){sc='s-p';st=`${pending} day${pending>1?'s':''} pending`;}
-    else if(upcoming.length>0){sc='s-s';st=`Scheduled ${disp(upcoming[0])}`;}
-    else{sc='s-c';st='All cleared';}
-    const phList=[...new Set(earned.map(e=>e.phName))].join(', ');
-    h+=`<div class="oil-row"><div><div class="owho">${staff}</div><div class="odet">${total} PH worked · ${phList}</div></div><span class="st ${sc}">${st}</span></div>`;
-  }
-  document.getElementById('oil-content').innerHTML=h;
+
+  return records;
 }
 
-function renderCov(){const k=wk(curWeek);const data=cache[k]||{};let h='';let sasDays=0;for(let i=0;i<7;i++){const d=addD(curWeek,i);const day=DAYS[i];const isWD=i<5;let ch=0,sa=0,of=0;for(const s of STAFF){const v=data[`${s}_${day}`];if(v==='Chalet')ch++;if(v==='SAS')sa++;if(v==='Office')of++;}if(sa>0&&isWD)sasDays++;const warns=[];if(ch===0)warns.push('Chalet — no cover');if(isWD&&of===0)warns.push('Office — no cover');const cls=warns.length?'cv-warn':'cv-ok';const lbl=warns.length?warns.join(' · '):'All sites covered';h+=`<div class="cv-row"><span class="cv-day">${DN[i]} ${disp(d)}</span><span class="${cls}">${lbl}</span></div>`;}
-if(sasDays<4)h+=`<div class="cv-row" style="border-top:0.5px solid #eee;margin-top:4px;padding-top:4px"><span class="cv-day" style="font-size:10px;color:#bbb">SAS weekly</span><span class="cv-warn">Only ${sasDays}/5 weekdays (min 4)</span></div>`;
-document.getElementById('cov-content').innerHTML=h;}
+// ── RENDER OIL ───────────────────────────────────────────────────────────────
+function renderOIL(){
+  const today=new Date();
+  const monthStart=new Date(today.getFullYear(),today.getMonth(),1);
+  const records=computeOIL();
+
+  // Active: overdue, pending, scheduled, cleared-this-month (not dismissed)
+  const active=records.filter(r=>{
+    if(dismissed.has(r.id))return false;
+    if(r.status==='cleared'&&r.oilDate<monthStart)return false;
+    return true;
+  });
+
+  // Historical: cleared before this month (not dismissed)
+  const historical=records.filter(r=>{
+    if(dismissed.has(r.id))return false;
+    return r.status==='cleared'&&r.oilDate<monthStart;
+  });
+
+  const order={overdue:0,pending:1,scheduled:2,cleared:3};
+  active.sort((a,b)=>order[a.status]-order[b.status]);
+  historical.sort((a,b)=>b.oilDate-a.oilDate);
+
+  const panel=document.getElementById('oil-panel');
+  if(editMode)panel.classList.add('edit-active-mode');
+  else panel.classList.remove('edit-active-mode');
+
+  let h='';
+  if(active.length===0){
+    h='<div class="es">No active OIL obligations</div>';
+  } else {
+    for(const r of active){
+      const stCls={overdue:'s-o',pending:'s-p',scheduled:'s-s',cleared:'s-c'}[r.status];
+      const stLbl={
+        overdue:`Overdue · deadline was ${disp(r.deadline)}`,
+        pending:`Pending · due by ${disp(r.deadline)}`,
+        scheduled:`Scheduled ${disp(r.oilDate)}`,
+        cleared:`Cleared ${disp(r.oilDate)}`
+      }[r.status];
+      const canDel=(r.status==='overdue'||r.status==='pending');
+      h+=`<div class="oil-row">
+        <div class="oil-avatar">${initials(r.staff)}</div>
+        <div class="oil-main">
+          <div class="oil-name">${r.staff}</div>
+          <div class="oil-detail">${r.event}</div>
+        </div>
+        <div class="oil-right">
+          <span class="st ${stCls}">${stLbl}</span>
+          ${canDel?`<button class="del-btn" data-id="${r.id}" title="Dismiss this record">✕</button>`:''}
+        </div>
+      </div>`;
+    }
+  }
+
+  // Historical section
+  h+=`<button class="hist-toggle" id="hist-btn">▸ History (${historical.length})</button>`;
+  h+=`<div class="hist-section ${histOpen?'open':''}" id="hist-section">`;
+  if(historical.length===0){
+    h+='<div class="es" style="font-size:11px">No historical records</div>';
+  } else {
+    for(const r of historical){
+      h+=`<div class="hist-row">
+        <span class="hist-name">${r.staff} · ${r.event}</span>
+        <span class="hist-detail">Cleared ${disp(r.oilDate)}</span>
+      </div>`;
+    }
+  }
+  h+='</div>';
+
+  document.getElementById('oil-content').innerHTML=h;
+
+  // Wire delete buttons
+  document.querySelectorAll('.del-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>dismissOIL(btn.dataset.id));
+  });
+
+  // Wire history toggle
+  const histBtn=document.getElementById('hist-btn');
+  if(histBtn){
+    histBtn.addEventListener('click',()=>{
+      histOpen=!histOpen;
+      const sec=document.getElementById('hist-section');
+      if(sec)sec.classList.toggle('open',histOpen);
+      histBtn.textContent=(histOpen?'▾':'▸')+` History (${historical.length})`;
+    });
+  }
+}
+
+// ── RENDER COVERAGE ───────────────────────────────────────────────────────────
+function renderCov(){
+  const k=wk(curWeek);const data=cache[k]||{};
+  let h='';let sasDays=0;
+  for(let i=0;i<7;i++){
+    const d=addD(curWeek,i);const day=DAYS[i];const isWD=i<5;
+    let ch=0,sa=0,of=0;
+    for(const s of STAFF){const v=data[`${s}_${day}`];if(v==='Chalet')ch++;if(v==='SAS')sa++;if(v==='Office')of++;}
+    if(sa>0&&isWD)sasDays++;
+    const warns=[];
+    if(ch===0)warns.push('Chalet — no cover');
+    if(isWD&&of===0)warns.push('Office — no cover');
+    const cls=warns.length?'cv-warn':'cv-ok';
+    const lbl=warns.length?warns.join(' · '):'All sites covered';
+    h+=`<div class="cv-row"><span class="cv-day">${DN[i]} ${disp(d)}</span><span class="${cls}">${lbl}</span></div>`;
+  }
+  if(sasDays<4)h+=`<div class="cv-row" style="border-top:0.5px solid #eee;margin-top:4px;padding-top:4px"><span class="cv-day" style="font-size:10px;color:#bbb">SAS weekly</span><span class="cv-warn">Only ${sasDays}/5 weekdays (min 4)</span></div>`;
+  document.getElementById('cov-content').innerHTML=h;
+}
 
 function setSynced(s){const el=document.getElementById('sync-dot');el.textContent={synced:'● synced',saving:'● saving…',error:'● offline'}[s]||s;el.className=s;}
 
 function openPIN(){document.getElementById('pin-overlay').classList.remove('hidden');document.getElementById('pin-input').value='';document.getElementById('pin-err').style.display='none';setTimeout(()=>document.getElementById('pin-input').focus(),50);}
 function closePIN(){document.getElementById('pin-overlay').classList.add('hidden');}
-function checkPIN(){if(document.getElementById('pin-input').value===ADMIN_PIN){editMode=true;const btn=document.getElementById('edit-btn');btn.textContent='✓ Exit edit';btn.classList.add('active');closePIN();renderGrid();}else{document.getElementById('pin-err').style.display='block';document.getElementById('pin-input').value='';document.getElementById('pin-input').focus();}}
+function checkPIN(){if(document.getElementById('pin-input').value===ADMIN_PIN){editMode=true;const btn=document.getElementById('edit-btn');btn.textContent='✓ Exit edit';btn.classList.add('active');closePIN();renderGrid();renderOIL();}else{document.getElementById('pin-err').style.display='block';document.getElementById('pin-input').value='';document.getElementById('pin-input').focus();}}
 
 function openEdit(staff,day){if(!editMode)return;const k=wk(curWeek);const{loc,note}=getShift(k,staff,day);editTarget={staff,day,wk:k};const i=DAYS.indexOf(day);const d=addD(curWeek,i);document.getElementById('edit-title').textContent=`${staff} · ${DN[i]} ${disp(d)}`;document.getElementById('loc-sel').value=loc;document.getElementById('note-inp').value=note;document.getElementById('edit-overlay').classList.remove('hidden');setTimeout(()=>document.getElementById('loc-sel').focus(),50);}
 function closeEdit(){document.getElementById('edit-overlay').classList.add('hidden');editTarget=null;}
@@ -295,12 +509,13 @@ async function nav(delta){curWeek=addD(curWeek,delta*7);renderHdr();if(!cache[wk
 async function init(){
   setSynced('saving');
   await seedIfEmpty();
+  await loadDismissed();
   for(const k of Object.keys(MIG))await loadWk(new Date(k));
   subWk(curWeek);
   renderHdr();renderGrid();renderOIL();renderCov();
   document.getElementById('prev-btn').addEventListener('click',()=>nav(-1));
   document.getElementById('next-btn').addEventListener('click',()=>nav(1));
-  document.getElementById('edit-btn').addEventListener('click',()=>{if(editMode){editMode=false;const btn=document.getElementById('edit-btn');btn.textContent='Edit';btn.classList.remove('active');renderGrid();}else{openPIN();}});
+  document.getElementById('edit-btn').addEventListener('click',()=>{if(editMode){editMode=false;const btn=document.getElementById('edit-btn');btn.textContent='Edit';btn.classList.remove('active');renderGrid();renderOIL();}else{openPIN();}});
   document.getElementById('pin-cancel').addEventListener('click',closePIN);
   document.getElementById('pin-ok').addEventListener('click',checkPIN);
   document.getElementById('pin-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkPIN();if(e.key==='Escape')closePIN();});
