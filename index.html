@@ -419,12 +419,11 @@ function renderOIL(){
   } else {
     for(const r of active){
       const stCls={overdue:'s-o',pending:'s-p',scheduled:'s-s',cleared:'s-c'}[r.status];
-      const stLbl={
-        overdue:`Overdue · deadline was ${disp(r.deadline)}`,
-        pending:`Pending · due by ${disp(r.deadline)}`,
-        scheduled:`Scheduled ${disp(r.oilDate)}`,
-        cleared:`Cleared ${disp(r.oilDate)}`
-      }[r.status];
+      let stLbl;
+      if(r.status==='overdue')stLbl=`Overdue · deadline was ${disp(r.deadline)}`;
+      else if(r.status==='pending')stLbl=`Pending · due by ${disp(r.deadline)}`;
+      else if(r.status==='scheduled')stLbl=`Scheduled ${disp(r.oilDate)}`;
+      else stLbl=`Cleared ${disp(r.oilDate)}`;
       const canDel=(r.status==='overdue'||r.status==='pending');
       h+=`<div class="oil-row">
         <div class="oil-avatar">${initials(r.staff)}</div>
