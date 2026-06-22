@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Duty Roster — Surgo Asset Partners</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;min-height:100vh;padding:24px 16px 48px;background:#efefef;position:relative;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:linear-gradient(160deg,#fff 0%,#f4f4f4 25%,#fff 40%,#ebebeb 60%,#fff 75%,#f7f7f7 100%);z-index:0;}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(-22deg,transparent 0px,transparent 52px,rgba(255,255,255,0.65) 52px,rgba(255,255,255,0.65) 68px,transparent 68px,transparent 120px,rgba(230,230,230,0.35) 120px,rgba(230,230,230,0.35) 128px);}
+.app{position:relative;z-index:1;max-width:940px;margin:0 auto;background:rgba(255,255,255,0.93);border-radius:12px;border:0.5px solid #d4d4d4;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.07),0 1px 4px rgba(0,0,0,0.04);}
+#seed-banner{background:#0a0a0a;color:#f0f0f0;font-size:12px;text-align:center;padding:10px;letter-spacing:0.04em;display:none;}
+.masthead{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:14px 20px;border-bottom:0.5px solid #ebebeb;background:rgba(255,255,255,0.97);}
+.brand{display:flex;align-items:center;gap:10px;}
+.s-mark{width:36px;height:36px;background:#0a0a0a;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.s-mark svg{width:20px;height:20px;}
+.brand-name{font-size:13px;font-weight:600;color:#0a0a0a;letter-spacing:0.03em;}
+.brand-sub{font-size:9px;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;}
+.week-nav{display:flex;align-items:center;gap:8px;}
+.nav-btn{background:transparent;border:0.5px solid #ccc;color:#444;font-size:12px;padding:5px 13px;border-radius:5px;cursor:pointer;font-family:inherit;}
+.nav-btn:hover{border-color:#888;color:#111;}
+#week-label{font-size:12px;font-weight:500;color:#111;min-width:200px;text-align:center;}
+.hdr-right{display:flex;align-items:center;gap:10px;}
+#sync-dot{font-size:11px;}
+#sync-dot.synced{color:#166534;}
+#sync-dot.saving{color:#b45309;}
+#sync-dot.error{color:#b91c1c;}
+#edit-btn{background:#0a0a0a;color:#f5f5f5;border:none;font-size:11px;padding:6px 16px;border-radius:5px;cursor:pointer;font-family:inherit;font-weight:500;letter-spacing:0.04em;}
+#edit-btn:hover{background:#2a2a2a;}
+#edit-btn.active{background:#166534;}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:8px 20px;background:#fafafa;border-bottom:0.5px solid #f0f0f0;}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:#666;}
+.ld{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.cov-rules{margin-left:auto;font-size:10px;color:#bbb;}
+.grid-wrap{overflow-x:auto;padding:0 20px 4px;}
+table{width:100%;border-collapse:collapse;min-width:580px;}
+th{font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:#aaa;text-align:center;padding:10px 3px 8px;border-bottom:0.5px solid #eee;}
+th.sc{text-align:left;width:90px;padding-left:0;}
+th.tc{color:#0a0a0a;border-bottom:2px solid #0a0a0a;}
+.th-d{display:block;font-weight:400;font-size:10px;text-transform:none;letter-spacing:0;}
+.th-t{display:block;font-size:9px;color:#0a0a0a;font-weight:600;text-transform:none;letter-spacing:0.02em;margin-top:1px;}
+.th-p{display:block;font-size:9px;color:#b45309;font-weight:500;text-transform:none;letter-spacing:0;margin-top:1px;}
+td{padding:6px 3px;text-align:center;border-bottom:0.5px solid #f5f5f5;vertical-align:middle;}
+td.sn{text-align:left;font-size:12px;font-weight:500;color:#111;padding-left:0;white-space:nowrap;}
+td.tc{background:rgba(0,0,0,0.025);}
+td.editable:hover{background:rgba(0,0,0,0.04);cursor:pointer;}
+tr:last-child td{border-bottom:none;}
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:3px 9px;border-radius:999px;letter-spacing:0.03em;white-space:nowrap;}
+.bc{background:#111;color:#f5f5f5;}
+.bs{background:#555;color:#f5f5f5;}
+.bo{background:transparent;color:#666;border:0.5px solid #bbb;}
+.bx{background:transparent;color:#c0c0c0;border:0.5px solid #e0e0e0;}
+.bl{background:#b91c1c;color:#fff;}
+.bi{background:#166534;color:#fff;}
+.empty{color:#d8d8d8;font-size:15px;}
+.ndot{color:#999;margin-left:2px;cursor:help;}
+.panels{display:grid;grid-template-columns:1fr 1fr;border-top:0.5px solid #eee;}
+@media(max-width:500px){.panels{grid-template-columns:1fr;}}
+.panel{padding:14px 20px;}
+.panel+.panel{border-left:0.5px solid #eee;}
+.ptitle{font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#bbb;margin-bottom:10px;}
+.oil-row{display:flex;align-items:flex-start;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid #f5f5f5;gap:8px;}
+.oil-row:last-child{border-bottom:none;}
+.owho{font-size:12px;font-weight:500;color:#111;}
+.odet{font-size:10px;color:#bbb;margin-top:1px;}
+.st{font-size:9px;padding:2px 8px;border-radius:999px;font-weight:500;white-space:nowrap;flex-shrink:0;}
+.s-p{background:#FEF3C7;color:#92400E;border:0.5px solid #FCD34D;}
+.s-s{background:#DBEAFE;color:#1E40AF;border:0.5px solid #93C5FD;}
+.s-c{background:#D1FAE5;color:#065F46;border:0.5px solid #6EE7B7;}
+.cv-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid #f5f5f5;}
+.cv-row:last-child{border-bottom:none;}
+.cv-day{font-size:11px;font-weight:500;color:#111;}
+.cv-ok{font-size:9px;padding:2px 7px;border-radius:999px;background:#f5f5f5;color:#999;}
+.cv-warn{font-size:9px;padding:2px 7px;border-radius:999px;background:#FEE2E2;color:#991B1B;border:0.5px solid #FECACA;}
+.es{font-size:12px;color:#d0d0d0;padding:8px 0;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:1000;}
+.overlay.hidden{display:none;}
+.modal{background:#fff;border-radius:12px;padding:24px;width:320px;max-width:90vw;border:0.5px solid #e0e0e0;box-shadow:0 8px 32px rgba(0,0,0,0.12);}
+.mtitle{font-size:14px;font-weight:600;color:#0a0a0a;margin-bottom:16px;}
+.flbl{font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:#999;margin-bottom:6px;margin-top:14px;}
+select,input[type="text"],input[type="password"]{width:100%;padding:8px 12px;border:0.5px solid #ccc;border-radius:6px;font-size:13px;font-family:inherit;color:#111;background:#fafafa;outline:none;}
+select:focus,input:focus{border-color:#666;background:#fff;}
+.mactions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;}
+.bsec{background:transparent;border:0.5px solid #ccc;color:#555;font-size:12px;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:inherit;}
+.bpri{background:#0a0a0a;border:none;color:#f5f5f5;font-size:12px;padding:7px 16px;border-radius:5px;cursor:pointer;font-family:inherit;font-weight:500;}
+.bpri:hover{background:#333;}
+.errmsg{font-size:11px;color:#b91c1c;margin-top:6px;display:none;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="seed-banner">Setting up for first use — importing roster data, please wait…</div>
+  <div class="masthead">
+    <div class="brand">
+      <div class="s-mark" aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 5.5C14 4.1 12.9 3 11.5 3H7C5.3 3 4 4.3 4 6c0 1.4.9 2.5 2.2 2.9L12 10.6c1 .3 1.7 1.2 1.7 2.2 0 1.3-1 2.2-2.2 2.2H7c-1.4 0-2.5-1.1-2.5-2.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M6 14.5C6 15.9 7.1 17 8.5 17H13c1.7 0 3-1.3 3-3 0-1.4-.9-2.5-2.2-2.9L8 9.4C7 9.1 6.3 8.2 6.3 7.2" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">Surgo Asset Partners</div>
+        <div class="brand-sub">Duty Roster</div>
+      </div>
+    </div>
+    <div class="week-nav">
+      <button class="nav-btn" id="prev-btn">← prev</button>
+      <span id="week-label">Loading…</span>
+      <button class="nav-btn" id="next-btn">next →</button>
+    </div>
+    <div class="hdr-right">
+      <span id="sync-dot" class="saving">● loading</span>
+      <button id="edit-btn">Edit</button>
+    </div>
+  </div>
+  <div class="legend">
+    <span class="leg"><span class="ld" style="background:#111"></span>Chalet</span>
+    <span class="leg"><span class="ld" style="background:#555"></span>SAS</span>
+    <span class="leg"><span class="ld" style="background:#bbb"></span>Office</span>
+    <span class="leg"><span class="ld" style="border:1px solid #ddd;background:transparent"></span>OFF</span>
+    <span class="leg"><span class="ld" style="background:#b91c1c"></span>Leave</span>
+    <span class="leg"><span class="ld" style="background:#166534"></span>OIL</span>
+    <span class="cov-rules">Chalet 7d · SAS 4/5 weekdays · Office daily Mon–Fri</span>
+  </div>
+  <div class="grid-wrap">
+    <table><thead id="t-head"></thead><tbody id="t-body"></tbody></table>
+  </div>
+  <div class="panels">
+    <div class="panel">
+      <div class="ptitle">OIL tracker</div>
+      <div id="oil-content"><div class="es">Loading…</div></div>
+    </div>
+    <div class="panel">
+      <div class="ptitle">Coverage · this week</div>
+      <div id="cov-content"><div class="es">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="pin-overlay" class="overlay hidden">
+  <div class="modal">
+    <div class="mtitle">Enter PIN to edit</div>
+    <input type="password" id="pin-input" maxlength="6" placeholder="••••" autocomplete="off"/>
+    <div class="errmsg" id="pin-err">Incorrect PIN. Try again.</div>
+    <div class="mactions">
+      <button class="bsec" id="pin-cancel">Cancel</button>
+      <button class="bpri" id="pin-ok">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<div id="edit-overlay" class="overlay hidden">
+  <div class="modal">
+    <div class="mtitle" id="edit-title">Edit shift</div>
+    <div class="flbl">Location</div>
+    <select id="loc-sel">
+      <option value="">— unplanned —</option>
+      <option value="Chalet">Chalet</option>
+      <option value="SAS">SAS</option>
+      <option value="Office">Office</option>
+      <option value="OFF">OFF</option>
+      <option value="Leave">Leave</option>
+      <option value="OIL">OIL</option>
+    </select>
+    <div class="flbl">Note (optional)</div>
+    <input type="text" id="note-inp" placeholder="e.g. covering for Jianhao" maxlength="80"/>
+    <div class="mactions">
+      <button class="bsec" id="edit-cancel">Cancel</button>
+      <button class="bpri" id="edit-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore,doc,setDoc,getDoc,onSnapshot,writeBatch } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const ADMIN_PIN='1234';
+const FB={apiKey:"AIzaSyAyJXftlJ1RwWH0We24O4QRlXuyN-ED47Q",authDomain:"surgo-duty-roster.firebaseapp.com",projectId:"surgo-duty-roster",storageBucket:"surgo-duty-roster.firebasestorage.app",messagingSenderId:"792788823180",appId:"1:792788823180:web:53934b69faa9cc78751fa9"};
+const STAFF=['Zhihong','Jianhao','Farrah','Fir','Rafillah'];
+const DAYS=['mon','tue','wed','thu','fri','sat','sun'];
+const DN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const PH={'2026-05-18':'Labour Day (sub)','2026-05-19':'Hari Raya Haji (sub)','2026-05-27':'Hari Raya Haji','2026-05-31':'Vesak Day','2026-06-01':'Vesak Day (sub)','2026-08-09':'National Day','2026-10-20':'Deepavali','2026-12-25':'Christmas Day'};
+const MIG={
+'2026-05-11':{Zhihong:{mon:'OFF',tue:'Chalet',wed:'Chalet',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'OFF'}},
+'2026-05-18':{Zhihong:{mon:'OFF',tue:'OFF',wed:'OFF',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'Chalet'},Jianhao:{mon:'Office',tue:'Chalet',wed:'Chalet',thu:'Chalet',fri:'OFF',sat:'OFF',sun:'Chalet'},Farrah:{mon:'SAS',tue:'OFF',wed:'SAS',thu:'SAS',fri:'SAS',sat:'Chalet',sun:'OFF'}},
+'2026-05-25':{Zhihong:{mon:'Chalet',tue:'OFF',wed:'Chalet',thu:'Chalet',fri:'Chalet',sat:'OFF',sun:'Chalet'},Jianhao:{mon:'Chalet',tue:'Chalet',wed:'OFF',thu:'Office',fri:'Office',sat:'Chalet',sun:'OFF'},Farrah:{mon:'SAS',tue:'SAS',wed:'OFF',thu:'SAS',fri:'SAS',sat:'OFF',sun:'Chalet'}},
+'2026-06-01':{Zhihong:{mon:'Chalet',tue:'Chalet',wed:'Chalet',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'OFF'},Jianhao:{mon:'Chalet',tue:'OFF',wed:'Office',thu:'Chalet',fri:'Office',sat:'OFF',sun:'Chalet'},Farrah:{mon:'OFF',tue:'SAS',wed:'SAS',thu:'SAS',fri:'SAS',sat:'Chalet',sun:'OFF'}},
+'2026-06-08':{Zhihong:{mon:'Office',tue:'Chalet',wed:'OFF',thu:'Chalet',fri:'Chalet',sat:'OIL',sun:'OFF'},Jianhao:{mon:'Office',tue:'OFF',wed:'Chalet',thu:'Office',fri:'OFF',sat:'Chalet',sun:'Chalet'},Farrah:{mon:'SAS',tue:'SAS',wed:'SAS',thu:'SAS',fri:'OFF',sat:'OFF',sun:'OIL'}},
+'2026-06-15':{Zhihong:{mon:'Chalet',tue:'Chalet',wed:'OFF',thu:'Chalet',fri:'Chalet',sat:'Chalet',sun:'OFF'},Jianhao:{mon:'OFF',tue:'Office',wed:'Chalet',thu:'Office',fri:'Office',sat:'OIL',sun:'OFF'},Farrah:{mon:'OFF',tue:'SAS',wed:'SAS',thu:'SAS',fri:'SAS',sat:'OFF',sun:'Chalet'}},
+'2026-06-22':{Zhihong:{mon:'Chalet',tue:'OFF',wed:'Chalet',thu:'Chalet',fri:'Chalet',sat:'OFF',sun:'Chalet'},Jianhao:{mon:'OFF',tue:'Office',wed:'Office',thu:'Office',fri:'Office',sat:'Chalet',sun:'OFF'},Farrah:{mon:'SAS',tue:'SAS',wed:'SAS',thu:'SAS',fri:'Office',sat:'OFF',sun:'OFF'}},
+'2026-06-29':{Zhihong:{mon:'Chalet',tue:'Office',wed:'Office',thu:'Chalet',fri:'Chalet',sat:'OFF',sun:'OFF'},Jianhao:{mon:'Office',tue:'Office',wed:'OFF',thu:'Office',fri:'Office',sat:'OFF',sun:'Chalet'},Farrah:{mon:'OFF',tue:'SAS',wed:'SAS',thu:'SAS',fri:'SAS',sat:'Chalet',sun:'OFF'}},
+'2026-07-06':{Zhihong:{mon:'Chalet',tue:'Office',wed:'Chalet',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'OFF'},Jianhao:{mon:'Office',tue:'Office',wed:'Office',thu:'Office',fri:'Office',sat:'OFF',sun:'OFF'},Farrah:{mon:'SAS',tue:'SAS',wed:'SAS',thu:'SAS',fri:'OFF',sat:'OFF',sun:'Chalet'}},
+'2026-07-13':{Zhihong:{mon:'Chalet',tue:'Chalet',wed:'Chalet',thu:'OFF',fri:'Chalet',sat:'Chalet',sun:'OFF'},Jianhao:{mon:'Office',tue:'OFF',wed:'Office',thu:'Chalet',fri:'Office',sat:'OFF',sun:'Chalet'},Farrah:{mon:'SAS',tue:'SAS',wed:'SAS',thu:'SAS',fri:'Office',sat:'OFF',sun:'OFF'}},
+'2026-07-20':{Zhihong:{mon:'Chalet',tue:'Chalet',wed:'Chalet',thu:'Chalet',fri:'OFF',sat:'OFF',sun:'Leave'}},
+'2026-07-27':{Zhihong:{mon:'OFF',tue:'OFF',wed:'Chalet',thu:'Chalet',fri:'Chalet',sat:'Chalet',sun:'Chalet'}}
+};
+
+const fbApp=initializeApp(FB);
+const db=getFirestore(fbApp);
+let curWeek=getMon(new Date());
+let cache={};
+let editMode=false;
+let editTarget=null;
+let unsub=null;
+
+function getMon(d){const r=new Date(d);const wd=r.getDay();r.setDate(r.getDate()+(wd===0?-6:1-wd));r.setHours(0,0,0,0);return r;}
+function wk(d){return d.toISOString().slice(0,10);}
+function addD(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function iso(d){return d.toISOString().slice(0,10);}
+function disp(d){return d.toLocaleDateString('en-SG',{day:'numeric',month:'short'});}
+function isToday(d){const t=new Date();return d.getDate()===t.getDate()&&d.getMonth()===t.getMonth()&&d.getFullYear()===t.getFullYear();}
+
+async function loadWk(mon){const k=wk(mon);const s=await getDoc(doc(db,'roster',k));cache[k]=s.exists()?s.data():{};}
+function subWk(mon){if(unsub)unsub();unsub=onSnapshot(doc(db,'roster',wk(mon)),s=>{cache[wk(mon)]=s.exists()?s.data():{};renderGrid();renderCov();setSynced('synced');},()=>setSynced('error'));}
+async function saveShift(weekKey,staff,day,loc,note){setSynced('saving');await setDoc(doc(db,'roster',weekKey),{[`${staff}_${day}`]:loc,[`${staff}_${day}_note`]:note||''},{merge:true});}
+async function seedIfEmpty(){const s=await getDoc(doc(db,'roster','2026-06-22'));if(s.exists())return;document.getElementById('seed-banner').style.display='block';const batch=writeBatch(db);for(const[k,sd] of Object.entries(MIG)){const flat={};for(const[staff,days] of Object.entries(sd))for(const[day,v] of Object.entries(days)){flat[`${staff}_${day}`]=v;flat[`${staff}_${day}_note`]='';}batch.set(doc(db,'roster',k),flat);}await batch.commit();document.getElementById('seed-banner').style.display='none';}
+
+function getShift(weekKey,staff,day){const d=cache[weekKey]||{};return{loc:d[`${staff}_${day}`]||'',note:d[`${staff}_${day}_note`]||''};}
+function badge(loc,note){if(!loc)return'<span class="empty">–</span>';const cls={Chalet:'bc',SAS:'bs',Office:'bo',OFF:'bx',Leave:'bl',OIL:'bi'}[loc]||'bx';const nd=note?` <span class="ndot" title="${note.replace(/"/g,"'")}">·</span>`:'';return`<span class="badge ${cls}">${loc}</span>${nd}`;}
+
+function renderHdr(){const sun=addD(curWeek,6);document.getElementById('week-label').textContent=`${disp(curWeek)} – ${disp(sun)} ${curWeek.getFullYear()}`;let h='<tr><th class="sc">Staff</th>';for(let i=0;i<7;i++){const d=addD(curWeek,i);const ph=PH[iso(d)];const td=isToday(d);h+=`<th class="${td?'tc':''}">${DN[i]}<span class="th-d">${disp(d)}</span>${td?'<span class="th-t">Today</span>':''}${ph?`<span class="th-p">${ph}</span>`:''}</th>`;}h+='</tr>';document.getElementById('t-head').innerHTML=h;}
+
+function renderGrid(){const k=wk(curWeek);let h='';for(const staff of STAFF){h+=`<tr><td class="sn">${staff}</td>`;for(let i=0;i<7;i++){const d=addD(curWeek,i);const day=DAYS[i];const{loc,note}=getShift(k,staff,day);const cls=[isToday(d)?'tc':'',editMode?'editable':''].filter(Boolean).join(' ');h+=`<td class="${cls}" data-staff="${staff}" data-day="${day}">${badge(loc,note)}</td>`;}h+='</tr>';}document.getElementById('t-body').innerHTML=h;if(editMode){document.querySelectorAll('#t-body td[data-staff]').forEach(td=>{td.addEventListener('click',()=>openEdit(td.dataset.staff,td.dataset.day));});}}
+
+function renderOIL(){const oilDates={};for(const[k,data] of Object.entries(cache)){const mon=new Date(k);for(const staff of STAFF){for(let i=0;i<7;i++){if(data[`${staff}_${DAYS[i]}`]==='OIL'){const d=addD(mon,i);if(!oilDates[staff])oilDates[staff]=[];oilDates[staff].push(d);}}}}
+const earned=[];const today=new Date();for(const[phISO,phName] of Object.entries(PH)){const phD=new Date(phISO);if(phD>today)continue;const phMon=getMon(phD);const phWk=wk(phMon);const data=cache[phWk];if(!data)continue;const dayIdx=phD.getDay()===0?6:phD.getDay()-1;const day=DAYS[dayIdx];for(const staff of STAFF){const loc=data[`${staff}_${day}`];if(loc&&loc!=='OFF'&&loc!=='Leave'&&loc!=='')earned.push({staff,phISO,phName});}}
+if(earned.length===0){document.getElementById('oil-content').innerHTML='<div class="es">No OIL records found</div>';return;}
+let h='';const seen=new Set();for(const{staff,phISO,phName} of earned){const key=`${staff}-${phISO}`;if(seen.has(key))continue;seen.add(key);const dates=oilDates[staff]||[];const phD=new Date(phISO);const matched=dates.filter(d=>d>phD).sort((a,b)=>a-b)[0];let sc,st;if(!matched){sc='s-p';st='Pending — unscheduled';}else if(matched<today){sc='s-c';st=`Cleared ${disp(matched)}`;}else{sc='s-s';st=`Scheduled ${disp(matched)}`;}h+=`<div class="oil-row"><div><div class="owho">${staff}</div><div class="odet">Earned · ${phISO} (${phName})</div></div><span class="st ${sc}">${st}</span></div>`;}
+document.getElementById('oil-content').innerHTML=h||'<div class="es">No OIL records</div>';}
+
+function renderCov(){const k=wk(curWeek);const data=cache[k]||{};let h='';let sasDays=0;for(let i=0;i<7;i++){const d=addD(curWeek,i);const day=DAYS[i];const isWD=i<5;let ch=0,sa=0,of=0;for(const s of STAFF){const v=data[`${s}_${day}`];if(v==='Chalet')ch++;if(v==='SAS')sa++;if(v==='Office')of++;}if(sa>0&&isWD)sasDays++;const warns=[];if(ch===0)warns.push('Chalet — no cover');if(isWD&&of===0)warns.push('Office — no cover');const cls=warns.length?'cv-warn':'cv-ok';const lbl=warns.length?warns.join(' · '):'All sites covered';h+=`<div class="cv-row"><span class="cv-day">${DN[i]} ${disp(d)}</span><span class="${cls}">${lbl}</span></div>`;}
+if(sasDays<4)h+=`<div class="cv-row" style="border-top:0.5px solid #eee;margin-top:4px;padding-top:4px"><span class="cv-day" style="font-size:10px;color:#bbb">SAS weekly</span><span class="cv-warn">Only ${sasDays}/5 weekdays (min 4)</span></div>`;
+document.getElementById('cov-content').innerHTML=h;}
+
+function setSynced(s){const el=document.getElementById('sync-dot');el.textContent={synced:'● synced',saving:'● saving…',error:'● offline'}[s]||s;el.className=s;}
+
+function openPIN(){document.getElementById('pin-overlay').classList.remove('hidden');document.getElementById('pin-input').value='';document.getElementById('pin-err').style.display='none';setTimeout(()=>document.getElementById('pin-input').focus(),50);}
+function closePIN(){document.getElementById('pin-overlay').classList.add('hidden');}
+function checkPIN(){if(document.getElementById('pin-input').value===ADMIN_PIN){editMode=true;const btn=document.getElementById('edit-btn');btn.textContent='✓ Exit edit';btn.classList.add('active');closePIN();renderGrid();}else{document.getElementById('pin-err').style.display='block';document.getElementById('pin-input').value='';document.getElementById('pin-input').focus();}}
+
+function openEdit(staff,day){if(!editMode)return;const k=wk(curWeek);const{loc,note}=getShift(k,staff,day);editTarget={staff,day,wk:k};const i=DAYS.indexOf(day);const d=addD(curWeek,i);document.getElementById('edit-title').textContent=`${staff} · ${DN[i]} ${disp(d)}`;document.getElementById('loc-sel').value=loc;document.getElementById('note-inp').value=note;document.getElementById('edit-overlay').classList.remove('hidden');setTimeout(()=>document.getElementById('loc-sel').focus(),50);}
+function closeEdit(){document.getElementById('edit-overlay').classList.add('hidden');editTarget=null;}
+async function doSave(){if(!editTarget)return;const loc=document.getElementById('loc-sel').value;const note=document.getElementById('note-inp').value.trim();await saveShift(editTarget.wk,editTarget.staff,editTarget.day,loc,note);closeEdit();}
+
+async function nav(delta){curWeek=addD(curWeek,delta*7);renderHdr();if(!cache[wk(curWeek)])await loadWk(curWeek);subWk(curWeek);renderGrid();renderCov();renderOIL();}
+
+async function init(){
+  setSynced('saving');
+  await seedIfEmpty();
+  for(const k of Object.keys(MIG))await loadWk(new Date(k));
+  subWk(curWeek);
+  renderHdr();renderGrid();renderOIL();renderCov();
+  document.getElementById('prev-btn').addEventListener('click',()=>nav(-1));
+  document.getElementById('next-btn').addEventListener('click',()=>nav(1));
+  document.getElementById('edit-btn').addEventListener('click',()=>{if(editMode){editMode=false;const btn=document.getElementById('edit-btn');btn.textContent='Edit';btn.classList.remove('active');renderGrid();}else{openPIN();}});
+  document.getElementById('pin-cancel').addEventListener('click',closePIN);
+  document.getElementById('pin-ok').addEventListener('click',checkPIN);
+  document.getElementById('pin-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkPIN();if(e.key==='Escape')closePIN();});
+  document.getElementById('edit-cancel').addEventListener('click',closeEdit);
+  document.getElementById('edit-save').addEventListener('click',doSave);
+  document.getElementById('note-inp').addEventListener('keydown',e=>{if(e.key==='Enter')doSave();if(e.key==='Escape')closeEdit();});
+}
+init();
+</script>
+</body>
+</html>
