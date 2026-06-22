@@ -176,7 +176,7 @@ select:focus,input:focus{border-color:#666;background:#fff;}
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore,doc,setDoc,getDoc,onSnapshot,writeBatch } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-const ADMIN_PIN='1234';
+const ADMIN_PIN='2026';
 const FB={apiKey:"AIzaSyAyJXftlJ1RwWH0We24O4QRlXuyN-ED47Q",authDomain:"surgo-duty-roster.firebaseapp.com",projectId:"surgo-duty-roster",storageBucket:"surgo-duty-roster.firebasestorage.app",messagingSenderId:"792788823180",appId:"1:792788823180:web:53934b69faa9cc78751fa9"};
 const STAFF=['Zhihong','Jianhao','Farrah','Fir','Rafillah'];
 const DAYS=['mon','tue','wed','thu','fri','sat','sun'];
@@ -224,11 +224,57 @@ function renderHdr(){const sun=addD(curWeek,6);document.getElementById('week-lab
 
 function renderGrid(){const k=wk(curWeek);let h='';for(const staff of STAFF){h+=`<tr><td class="sn">${staff}</td>`;for(let i=0;i<7;i++){const d=addD(curWeek,i);const day=DAYS[i];const{loc,note}=getShift(k,staff,day);const cls=[isToday(d)?'tc':'',editMode?'editable':''].filter(Boolean).join(' ');h+=`<td class="${cls}" data-staff="${staff}" data-day="${day}">${badge(loc,note)}</td>`;}h+='</tr>';}document.getElementById('t-body').innerHTML=h;if(editMode){document.querySelectorAll('#t-body td[data-staff]').forEach(td=>{td.addEventListener('click',()=>openEdit(td.dataset.staff,td.dataset.day));});}}
 
-function renderOIL(){const oilDates={};for(const[k,data] of Object.entries(cache)){const mon=new Date(k);for(const staff of STAFF){for(let i=0;i<7;i++){if(data[`${staff}_${DAYS[i]}`]==='OIL'){const d=addD(mon,i);if(!oilDates[staff])oilDates[staff]=[];oilDates[staff].push(d);}}}}
-const earned=[];const today=new Date();for(const[phISO,phName] of Object.entries(PH)){const phD=new Date(phISO);if(phD>today)continue;const phMon=getMon(phD);const phWk=wk(phMon);const data=cache[phWk];if(!data)continue;const dayIdx=phD.getDay()===0?6:phD.getDay()-1;const day=DAYS[dayIdx];for(const staff of STAFF){const loc=data[`${staff}_${day}`];if(loc&&loc!=='OFF'&&loc!=='Leave'&&loc!=='')earned.push({staff,phISO,phName});}}
-if(earned.length===0){document.getElementById('oil-content').innerHTML='<div class="es">No OIL records found</div>';return;}
-let h='';const seen=new Set();for(const{staff,phISO,phName} of earned){const key=`${staff}-${phISO}`;if(seen.has(key))continue;seen.add(key);const dates=oilDates[staff]||[];const phD=new Date(phISO);const matched=dates.filter(d=>d>phD).sort((a,b)=>a-b)[0];let sc,st;if(!matched){sc='s-p';st='Pending — unscheduled';}else if(matched<today){sc='s-c';st=`Cleared ${disp(matched)}`;}else{sc='s-s';st=`Scheduled ${disp(matched)}`;}h+=`<div class="oil-row"><div><div class="owho">${staff}</div><div class="odet">Earned · ${phISO} (${phName})</div></div><span class="st ${sc}">${st}</span></div>`;}
-document.getElementById('oil-content').innerHTML=h||'<div class="es">No OIL records</div>';}
+function renderOIL(){
+  const today=new Date();
+  // Collect OIL dates per staff
+  const oilByStaff={};
+  for(const[k,data] of Object.entries(cache)){
+    const mon=new Date(k);
+    for(const staff of STAFF){
+      for(let i=0;i<7;i++){
+        if(data[`${staff}_${DAYS[i]}`]==='OIL'){
+          const d=addD(mon,i);
+          if(!oilByStaff[staff])oilByStaff[staff]=[];
+          oilByStaff[staff].push(d);
+        }
+      }
+    }
+  }
+  // Collect PHs worked per staff (grouped)
+  const earnedByStaff={};
+  for(const[phISO,phName] of Object.entries(PH)){
+    const phD=new Date(phISO);
+    if(phD>today)continue;
+    const phMon=getMon(phD);const phWk=wk(phMon);
+    const data=cache[phWk];if(!data)continue;
+    const dayIdx=phD.getDay()===0?6:phD.getDay()-1;
+    const day=DAYS[dayIdx];
+    for(const staff of STAFF){
+      const loc=data[`${staff}_${day}`];
+      if(loc&&loc!=='OFF'&&loc!=='Leave'&&loc!==''){
+        if(!earnedByStaff[staff])earnedByStaff[staff]=[];
+        earnedByStaff[staff].push({phISO,phName});
+      }
+    }
+  }
+  const entries=Object.entries(earnedByStaff);
+  if(entries.length===0){document.getElementById('oil-content').innerHTML='<div class="es">No OIL records found</div>';return;}
+  let h='';
+  for(const[staff,earned] of entries){
+    const oilDates=(oilByStaff[staff]||[]).sort((a,b)=>a-b);
+    const total=earned.length;
+    const cleared=oilDates.filter(d=>d<today).length;
+    const upcoming=oilDates.filter(d=>d>=today);
+    const pending=Math.max(0,total-oilDates.length);
+    let sc,st;
+    if(pending>0){sc='s-p';st=`${pending} day${pending>1?'s':''} pending`;}
+    else if(upcoming.length>0){sc='s-s';st=`Scheduled ${disp(upcoming[0])}`;}
+    else{sc='s-c';st='All cleared';}
+    const phList=[...new Set(earned.map(e=>e.phName))].join(', ');
+    h+=`<div class="oil-row"><div><div class="owho">${staff}</div><div class="odet">${total} PH worked · ${phList}</div></div><span class="st ${sc}">${st}</span></div>`;
+  }
+  document.getElementById('oil-content').innerHTML=h;
+}
 
 function renderCov(){const k=wk(curWeek);const data=cache[k]||{};let h='';let sasDays=0;for(let i=0;i<7;i++){const d=addD(curWeek,i);const day=DAYS[i];const isWD=i<5;let ch=0,sa=0,of=0;for(const s of STAFF){const v=data[`${s}_${day}`];if(v==='Chalet')ch++;if(v==='SAS')sa++;if(v==='Office')of++;}if(sa>0&&isWD)sasDays++;const warns=[];if(ch===0)warns.push('Chalet — no cover');if(isWD&&of===0)warns.push('Office — no cover');const cls=warns.length?'cv-warn':'cv-ok';const lbl=warns.length?warns.join(' · '):'All sites covered';h+=`<div class="cv-row"><span class="cv-day">${DN[i]} ${disp(d)}</span><span class="${cls}">${lbl}</span></div>`;}
 if(sasDays<4)h+=`<div class="cv-row" style="border-top:0.5px solid #eee;margin-top:4px;padding-top:4px"><span class="cv-day" style="font-size:10px;color:#bbb">SAS weekly</span><span class="cv-warn">Only ${sasDays}/5 weekdays (min 4)</span></div>`;
