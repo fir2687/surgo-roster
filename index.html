@@ -206,9 +206,9 @@ let editTarget=null;
 let unsub=null;
 
 function getMon(d){const r=new Date(d);const wd=r.getDay();r.setDate(r.getDate()+(wd===0?-6:1-wd));r.setHours(0,0,0,0);return r;}
-function wk(d){return d.toISOString().slice(0,10);}
+function wk(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),dd=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${dd}`;}
 function addD(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
-function iso(d){return d.toISOString().slice(0,10);}
+function iso(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),dd=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${dd}`;}
 function disp(d){return d.toLocaleDateString('en-SG',{day:'numeric',month:'short'});}
 function isToday(d){const t=new Date();return d.getDate()===t.getDate()&&d.getMonth()===t.getMonth()&&d.getFullYear()===t.getFullYear();}
 
