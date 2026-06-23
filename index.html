@@ -6,18 +6,22 @@
 <title>Duty Roster — Surgo Asset Partners</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;min-height:100vh;padding:24px 16px 48px;background:#efefef;position:relative;overflow-x:hidden;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;min-height:100vh;padding:16px 12px 40px;background:#efefef;position:relative;overflow-x:hidden;}
 body::before{content:'';position:fixed;inset:0;background:linear-gradient(160deg,#fff 0%,#f4f4f4 25%,#fff 40%,#ebebeb 60%,#fff 75%,#f7f7f7 100%);z-index:0;}
 body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(-22deg,transparent 0px,transparent 52px,rgba(255,255,255,0.65) 52px,rgba(255,255,255,0.65) 68px,transparent 68px,transparent 120px,rgba(230,230,230,0.35) 120px,rgba(230,230,230,0.35) 128px);}
-.app{position:relative;z-index:1;max-width:940px;margin:0 auto;background:rgba(255,255,255,0.93);border-radius:12px;border:0.5px solid #d4d4d4;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.07),0 1px 4px rgba(0,0,0,0.04);}
+.app{position:relative;z-index:1;max-width:1280px;margin:0 auto;background:rgba(255,255,255,0.93);border-radius:12px;border:0.5px solid #d4d4d4;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.07);}
 #seed-banner{background:#0a0a0a;color:#f0f0f0;font-size:12px;text-align:center;padding:10px;letter-spacing:0.04em;display:none;}
+/* MASTHEAD */
 .masthead{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:14px 20px;border-bottom:0.5px solid #ebebeb;background:rgba(255,255,255,0.97);}
 .brand{display:flex;align-items:center;gap:10px;}
-.s-mark{width:36px;height:36px;background:#0a0a0a;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.s-mark svg{width:20px;height:20px;}
-.brand-name{font-size:13px;font-weight:600;color:#0a0a0a;letter-spacing:0.03em;}
+.s-mark{width:40px;height:40px;border-radius:8px;overflow:hidden;flex-shrink:0;}
+.s-mark img{width:100%;height:100%;object-fit:cover;object-position:center 10%;display:block;}
+.brand-name{font-size:14px;font-weight:600;color:#0a0a0a;letter-spacing:0.03em;}
 .brand-sub{font-size:9px;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;}
-.week-nav{display:flex;align-items:center;gap:8px;}
+.hdr-center{display:flex;align-items:center;gap:8px;}
+.view-toggle{display:flex;border:0.5px solid #ddd;border-radius:6px;overflow:hidden;}
+.view-btn{background:transparent;border:none;font-size:11px;padding:5px 12px;cursor:pointer;font-family:inherit;color:#888;}
+.view-btn.active{background:#0a0a0a;color:#fff;}
 .nav-btn{background:transparent;border:0.5px solid #ccc;color:#444;font-size:12px;padding:5px 13px;border-radius:5px;cursor:pointer;font-family:inherit;}
 .nav-btn:hover{border-color:#888;color:#111;}
 #week-label{font-size:12px;font-weight:500;color:#111;min-width:200px;text-align:center;}
@@ -29,23 +33,26 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;back
 #edit-btn{background:#0a0a0a;color:#f5f5f5;border:none;font-size:11px;padding:6px 16px;border-radius:5px;cursor:pointer;font-family:inherit;font-weight:500;letter-spacing:0.04em;}
 #edit-btn:hover{background:#2a2a2a;}
 #edit-btn.active{background:#166534;}
+/* LEGEND */
 .legend{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:8px 20px;background:#fafafa;border-bottom:0.5px solid #f0f0f0;}
 .leg{display:flex;align-items:center;gap:5px;font-size:11px;color:#666;}
 .ld{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .cov-rules{margin-left:auto;font-size:10px;color:#bbb;}
+/* GRID */
 .grid-wrap{overflow-x:auto;padding:0 20px 4px;}
-table{width:100%;border-collapse:collapse;min-width:580px;}
+table{width:100%;border-collapse:collapse;min-width:620px;}
 th{font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:#aaa;text-align:center;padding:10px 3px 8px;border-bottom:0.5px solid #eee;}
 th.sc{text-align:left;width:90px;padding-left:0;}
 th.tc{color:#0a0a0a;border-bottom:2px solid #0a0a0a;}
 .th-d{display:block;font-weight:400;font-size:10px;text-transform:none;letter-spacing:0;}
-.th-t{display:block;font-size:9px;color:#0a0a0a;font-weight:600;text-transform:none;letter-spacing:0.02em;margin-top:1px;}
+.th-t{display:block;font-size:12px;font-weight:700;color:#0a0a0a;text-transform:none;letter-spacing:0.01em;margin-top:2px;}
 .th-p{display:block;font-size:9px;color:#b45309;font-weight:500;text-transform:none;letter-spacing:0;margin-top:1px;}
-td{padding:6px 3px;text-align:center;border-bottom:0.5px solid #f5f5f5;vertical-align:middle;}
+td{padding:7px 3px;text-align:center;border-bottom:0.5px solid #f5f5f5;vertical-align:middle;}
 td.sn{text-align:left;font-size:12px;font-weight:500;color:#111;padding-left:0;white-space:nowrap;}
 td.tc{background:rgba(0,0,0,0.025);}
 td.editable:hover{background:rgba(0,0,0,0.04);cursor:pointer;}
 tr:last-child td{border-bottom:none;}
+/* BADGES */
 .badge{display:inline-block;font-size:10px;font-weight:500;padding:3px 9px;border-radius:999px;letter-spacing:0.03em;white-space:nowrap;}
 .bc{background:#111;color:#f5f5f5;}
 .bs{background:#555;color:#f5f5f5;}
@@ -53,14 +60,29 @@ tr:last-child td{border-bottom:none;}
 .bx{background:transparent;color:#c0c0c0;border:0.5px solid #e0e0e0;}
 .bl{background:#b91c1c;color:#fff;}
 .bi{background:#166534;color:#fff;}
+.bw{background:#DBEAFE;color:#1E40AF;border:0.5px solid #93C5FD;}
+.bam{background:#FEF3C7;color:#92400E;border:0.5px solid #FCD34D;}
+.bpm{background:#FDE68A;color:#78350F;border:0.5px solid #F59E0B;}
 .empty{color:#d8d8d8;font-size:15px;}
 .ndot{color:#999;margin-left:2px;cursor:help;}
+/* MONTH VIEW */
+.month-grid{overflow-x:auto;padding:0 20px 8px;}
+.month-table{width:100%;border-collapse:collapse;min-width:700px;}
+.month-table th{font-size:10px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:#aaa;text-align:center;padding:8px 4px;border-bottom:0.5px solid #eee;}
+.month-table th.msc{text-align:left;width:70px;padding-left:0;color:#aaa;}
+.month-table td{padding:4px 3px;text-align:center;border-bottom:0.5px solid #f8f8f8;vertical-align:middle;}
+.month-table td.mdate{text-align:left;font-size:10px;font-weight:500;color:#999;padding-left:0;white-space:nowrap;min-width:60px;}
+.month-table td.mdate.today-row{color:#0a0a0a;font-weight:700;}
+.month-table tr:last-child td{border-bottom:none;}
+.month-table .wk-divider td{border-top:1px solid #eee;}
+.mbadge{display:inline-block;font-size:9px;font-weight:500;padding:2px 6px;border-radius:999px;white-space:nowrap;}
+/* PANELS */
 .panels{display:grid;grid-template-columns:1fr 1fr;border-top:0.5px solid #eee;}
-@media(max-width:500px){.panels{grid-template-columns:1fr;}}
+@media(max-width:600px){.panels{grid-template-columns:1fr;}}
 .panel{padding:14px 20px;}
 .panel+.panel{border-left:0.5px solid #eee;}
 .ptitle{font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:#bbb;margin-bottom:10px;}
-/* OIL TRACKER */
+/* OIL */
 .oil-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:0.5px solid #f5f5f5;}
 .oil-row:last-child{border-bottom:none;}
 .oil-avatar{width:28px;height:28px;border-radius:50%;background:#f0f0f0;border:0.5px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#555;flex-shrink:0;}
@@ -111,13 +133,19 @@ select:focus,input:focus{border-color:#666;background:#fff;}
   <div id="seed-banner">Setting up for first use — importing roster data, please wait…</div>
   <div class="masthead">
     <div class="brand">
-      <div class="s-mark" aria-hidden="true"><img src="surgo-logo.jpg" style="width:100%;height:100%;object-fit:cover;object-position:center 10%;border-radius:7px;display:block;" alt="Surgo"/></div>
+      <div class="s-mark" aria-hidden="true">
+        <img src="surgo-logo.jpg" style="width:100%;height:100%;object-fit:cover;object-position:center 10%;display:block;" alt="Surgo"/>
+      </div>
       <div>
         <div class="brand-name">Surgo Asset Partners</div>
         <div class="brand-sub">Duty Roster</div>
       </div>
     </div>
-    <div class="week-nav">
+    <div class="hdr-center">
+      <div class="view-toggle">
+        <button class="view-btn active" id="week-btn">Week</button>
+        <button class="view-btn" id="month-btn">Month</button>
+      </div>
       <button class="nav-btn" id="prev-btn">← prev</button>
       <span id="week-label">Loading…</span>
       <button class="nav-btn" id="next-btn">next →</button>
@@ -134,10 +162,20 @@ select:focus,input:focus{border-color:#666;background:#fff;}
     <span class="leg"><span class="ld" style="border:1px solid #ddd;background:transparent"></span>OFF</span>
     <span class="leg"><span class="ld" style="background:#b91c1c"></span>Leave</span>
     <span class="leg"><span class="ld" style="background:#166534"></span>OIL</span>
+    <span class="leg"><span class="ld" style="background:#BFDBFE"></span>WFH</span>
+    <span class="leg"><span class="ld" style="background:#FEF3C7"></span>AM Leave</span>
+    <span class="leg"><span class="ld" style="background:#FDE68A"></span>PM Leave</span>
     <span class="cov-rules">Chalet 7d · SAS 4/5 weekdays · Office daily Mon–Fri</span>
   </div>
-  <div class="grid-wrap">
-    <table><thead id="t-head"></thead><tbody id="t-body"></tbody></table>
+  <div id="week-view">
+    <div class="grid-wrap">
+      <table><thead id="t-head"></thead><tbody id="t-body"></tbody></table>
+    </div>
+  </div>
+  <div id="month-view" style="display:none;">
+    <div class="month-grid">
+      <table class="month-table" id="m-table"></table>
+    </div>
   </div>
   <div class="panels">
     <div class="panel" id="oil-panel">
@@ -166,14 +204,17 @@ select:focus,input:focus{border-color:#666;background:#fff;}
 <div id="edit-overlay" class="overlay hidden">
   <div class="modal">
     <div class="mtitle" id="edit-title">Edit shift</div>
-    <div class="flbl">Location</div>
+    <div class="flbl">Location / Status</div>
     <select id="loc-sel">
       <option value="">— unplanned —</option>
       <option value="Chalet">Chalet</option>
       <option value="SAS">SAS</option>
       <option value="Office">Office</option>
+      <option value="WFH">WFH</option>
       <option value="OFF">OFF</option>
-      <option value="Leave">Leave</option>
+      <option value="Leave">Leave (Full Day)</option>
+      <option value="AM Leave">AM Leave</option>
+      <option value="PM Leave">PM Leave</option>
       <option value="OIL">OIL</option>
     </select>
     <div class="flbl">Note (optional)</div>
@@ -187,7 +228,7 @@ select:focus,input:focus{border-color:#666;background:#fff;}
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore,doc,setDoc,getDoc,onSnapshot,writeBatch,updateDoc,arrayUnion,arrayRemove }
+import { getFirestore,doc,setDoc,getDoc,onSnapshot,writeBatch }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const ADMIN_PIN='2026';
@@ -197,11 +238,10 @@ const STAFF=['Zhihong','Jianhao','Farrah','Fir','Rafillah'];
 const DAYS=['mon','tue','wed','thu','fri','sat','sun'];
 const DN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
-// SG 2026 gazetted PHs — paired means Sunday+Monday sub = 1 OIL max
 const PH_EVENTS=[
   {name:"New Year's Day",dates:['2026-01-01']},
   {name:"Chinese New Year",dates:['2026-02-17']},
-  {name:"Chinese New Year (Day 2)",dates:['2026-02-18']},
+  {name:"Chinese New Year Day 2",dates:['2026-02-18']},
   {name:"Hari Raya Puasa",dates:['2026-03-21']},
   {name:"Good Friday",dates:['2026-04-03']},
   {name:"Labour Day",dates:['2026-05-01']},
@@ -212,22 +252,12 @@ const PH_EVENTS=[
   {name:"Christmas Day",dates:['2026-12-25']},
 ];
 
-// For column header labels
 const PH_LABELS={
-  '2026-01-01':"New Year's Day",
-  '2026-02-17':"Chinese New Year",
-  '2026-02-18':"Chinese New Year",
-  '2026-03-21':"Hari Raya Puasa",
-  '2026-04-03':"Good Friday",
-  '2026-05-01':"Labour Day",
-  '2026-05-27':"Hari Raya Haji",
-  '2026-05-31':"Vesak Day",
-  '2026-06-01':"Vesak Day (sub)",
-  '2026-08-09':"National Day",
-  '2026-08-10':"National Day (sub)",
-  '2026-11-08':"Deepavali",
-  '2026-11-09':"Deepavali (sub)",
-  '2026-12-25':"Christmas Day",
+  '2026-01-01':"New Year's Day",'2026-02-17':"CNY Day 1",'2026-02-18':"CNY Day 2",
+  '2026-03-21':"Hari Raya Puasa",'2026-04-03':"Good Friday",'2026-05-01':"Labour Day",
+  '2026-05-27':"Hari Raya Haji",'2026-05-31':"Vesak Day",'2026-06-01':"Vesak Day (sub)",
+  '2026-08-09':"National Day",'2026-08-10':"National Day (sub)",
+  '2026-11-08':"Deepavali",'2026-11-09':"Deepavali (sub)",'2026-12-25':"Christmas Day",
 };
 
 const MIG={
@@ -248,12 +278,14 @@ const MIG={
 const fbApp=initializeApp(FB);
 const db=getFirestore(fbApp);
 let curWeek=getMon(new Date());
+let curMonth=new Date();
 let cache={};
 let dismissed=new Set();
 let editMode=false;
 let editTarget=null;
 let unsub=null;
 let histOpen=false;
+let viewMode='week';
 
 function getMon(d){const r=new Date(d);const wd=r.getDay();r.setDate(r.getDate()+(wd===0?-6:1-wd));r.setHours(0,0,0,0);return r;}
 function wk(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${dd}`;}
@@ -262,49 +294,50 @@ function iso(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0')
 function disp(d){return d.toLocaleDateString('en-SG',{day:'numeric',month:'short'});}
 function isToday(d){const t=new Date();return d.getDate()===t.getDate()&&d.getMonth()===t.getMonth()&&d.getFullYear()===t.getFullYear();}
 function initials(name){return name.slice(0,2).toUpperCase();}
+function monthLabel(d){return d.toLocaleDateString('en-SG',{month:'long',year:'numeric'});}
 
 async function loadWk(mon){const k=wk(mon);const s=await getDoc(doc(db,'roster',k));cache[k]=s.exists()?s.data():{};}
 function subWk(mon){if(unsub)unsub();unsub=onSnapshot(doc(db,'roster',wk(mon)),s=>{cache[wk(mon)]=s.exists()?s.data():{};renderGrid();renderCov();renderOIL();setSynced('synced');},()=>setSynced('error'));}
 async function saveShift(weekKey,staff,day,loc,note){setSynced('saving');await setDoc(doc(db,'roster',weekKey),{[`${staff}_${day}`]:loc,[`${staff}_${day}_note`]:note||''},{merge:true});}
 
-async function loadDismissed(){
-  const s=await getDoc(doc(db,'oilMeta','dismissed'));
-  dismissed=new Set(s.exists()?(s.data().ids||[]):[]);
-}
-async function dismissOIL(id){
-  dismissed.add(id);
-  await setDoc(doc(db,'oilMeta','dismissed'),{ids:Array.from(dismissed)},{merge:true});
-  renderOIL();
-}
+async function loadDismissed(){const s=await getDoc(doc(db,'oilMeta','dismissed'));dismissed=new Set(s.exists()?(s.data().ids||[]):[]);}
+async function dismissOIL(id){dismissed.add(id);await setDoc(doc(db,'oilMeta','dismissed'),{ids:Array.from(dismissed)},{merge:true});renderOIL();}
 
-async function seedIfEmpty(){
-  const s=await getDoc(doc(db,'roster','2026-06-22'));
-  if(s.exists())return;
-  document.getElementById('seed-banner').style.display='block';
-  const batch=writeBatch(db);
-  for(const[k,sd] of Object.entries(MIG)){
-    const flat={};
-    for(const[staff,days] of Object.entries(sd))
-      for(const[day,v] of Object.entries(days)){flat[`${staff}_${day}`]=v;flat[`${staff}_${day}_note`]='';}
-    batch.set(doc(db,'roster',k),flat);
-  }
-  await batch.commit();
-  document.getElementById('seed-banner').style.display='none';
-}
+async function seedIfEmpty(){const s=await getDoc(doc(db,'roster','2026-06-22'));if(s.exists())return;document.getElementById('seed-banner').style.display='block';const batch=writeBatch(db);for(const[k,sd] of Object.entries(MIG)){const flat={};for(const[staff,days] of Object.entries(sd))for(const[day,v] of Object.entries(days)){flat[`${staff}_${day}`]=v;flat[`${staff}_${day}_note`]='';}batch.set(doc(db,'roster',k),flat);}await batch.commit();document.getElementById('seed-banner').style.display='none';}
 
 function getShift(weekKey,staff,day){const d=cache[weekKey]||{};return{loc:d[`${staff}_${day}`]||'',note:d[`${staff}_${day}_note`]||''};}
-function badge(loc,note){if(!loc)return'<span class="empty">–</span>';const cls={Chalet:'bc',SAS:'bs',Office:'bo',OFF:'bx',Leave:'bl',OIL:'bi'}[loc]||'bx';const nd=note?` <span class="ndot" title="${note.replace(/"/g,"'")}">·</span>`:'';return`<span class="badge ${cls}">${loc}</span>${nd}`;}
+
+function badge(loc,note){
+  if(!loc)return'<span class="empty">–</span>';
+  const cls={Chalet:'bc',SAS:'bs',Office:'bo',OFF:'bx',Leave:'bl',OIL:'bi',WFH:'bw','AM Leave':'bam','PM Leave':'bpm'}[loc]||'bx';
+  const lbl=loc==='AM Leave'?'AM Lv':loc==='PM Leave'?'PM Lv':loc;
+  const nd=note?` <span class="ndot" title="${note.replace(/"/g,"'")}">·</span>`:'';
+  return`<span class="badge ${cls}">${lbl}</span>${nd}`;
+}
+
+function mbadge(loc){
+  if(!loc)return'<span style="color:#e0e0e0;font-size:12px;">–</span>';
+  const cls={Chalet:'bc',SAS:'bs',Office:'bo',OFF:'bx',Leave:'bl',OIL:'bi',WFH:'bw','AM Leave':'bam','PM Leave':'bpm'}[loc]||'bx';
+  const lbl=loc==='AM Leave'?'AM':loc==='PM Leave'?'PM':loc==='Chalet'?'Ch':loc==='Office'?'Off':loc==='Leave'?'Lv':loc;
+  return`<span class="mbadge badge ${cls}">${lbl}</span>`;
+}
 
 function renderHdr(){
-  const sun=addD(curWeek,6);
-  document.getElementById('week-label').textContent=`${disp(curWeek)} – ${disp(sun)} ${curWeek.getFullYear()}`;
-  let h='<tr><th class="sc">Staff</th>';
-  for(let i=0;i<7;i++){
-    const d=addD(curWeek,i);const ph=PH_LABELS[iso(d)];const td=isToday(d);
-    h+=`<th class="${td?'tc':''}">${DN[i]}<span class="th-d">${disp(d)}</span>${td?'<span class="th-t">Today</span>':''}${ph?`<span class="th-p">${ph}</span>`:''}</th>`;
+  if(viewMode==='week'){
+    const sun=addD(curWeek,6);
+    document.getElementById('week-label').textContent=`${disp(curWeek)} – ${disp(sun)} ${curWeek.getFullYear()}`;
+  } else {
+    document.getElementById('week-label').textContent=monthLabel(curMonth);
   }
-  h+='</tr>';
-  document.getElementById('t-head').innerHTML=h;
+  if(viewMode==='week'){
+    let h='<tr><th class="sc">Staff</th>';
+    for(let i=0;i<7;i++){
+      const d=addD(curWeek,i);const ph=PH_LABELS[iso(d)];const td=isToday(d);
+      h+=`<th class="${td?'tc':''}">${DN[i]}<span class="th-d">${disp(d)}</span>${td?'<span class="th-t">Today</span>':''}${ph?`<span class="th-p">${ph}</span>`:''}</th>`;
+    }
+    h+='</tr>';
+    document.getElementById('t-head').innerHTML=h;
+  }
 }
 
 function renderGrid(){
@@ -323,159 +356,119 @@ function renderGrid(){
   if(editMode)document.querySelectorAll('#t-body td[data-staff]').forEach(td=>{td.addEventListener('click',()=>openEdit(td.dataset.staff,td.dataset.day));});
 }
 
-// ── OIL COMPUTATION ──────────────────────────────────────────────────────────
+async function renderMonth(){
+  const yr=curMonth.getFullYear();
+  const mo=curMonth.getMonth();
+  const firstDay=new Date(yr,mo,1);
+  const lastDay=new Date(yr,mo+1,0);
+
+  // Get all mondays in this month view
+  let mondays=[];
+  let d=getMon(firstDay);
+  while(d<=lastDay){mondays.push(new Date(d));d=addD(d,7);}
+  if(getMon(firstDay)<firstDay)mondays.unshift(getMon(firstDay));
+
+  // Load all needed weeks
+  for(const m of mondays){if(!cache[wk(m)])await loadWk(m);}
+
+  let h=`<thead><tr><th class="msc">Date</th>`;
+  for(const s of STAFF)h+=`<th>${s.split(' ')[0]}</th>`;
+  h+=`</tr></thead><tbody>`;
+
+  for(let i=0;i<mondays.length;i++){
+    const mon=mondays[i];
+    for(let di=0;di<7;di++){
+      const day=addD(mon,di);
+      if(day.getMonth()!==mo)continue;
+      const dayName=DN[di];
+      const ph=PH_LABELS[iso(day)];
+      const td=isToday(day);
+      const k=wk(mon);
+      h+=`<tr>`;
+      h+=`<td class="mdate${td?' today-row':''}">${dayName} ${disp(day)}${ph?`<br><span style="font-size:9px;color:#b45309;">${ph}</span>`:''}${td?`<br><span style="font-size:9px;font-weight:700;color:#0a0a0a;">Today</span>`:''}</td>`;
+      for(const staff of STAFF){
+        const{loc}=getShift(k,staff,DAYS[di]);
+        h+=`<td>${mbadge(loc)}</td>`;
+      }
+      h+=`</tr>`;
+    }
+    if(i<mondays.length-1)h+=`<tr class="wk-divider"><td colspan="${STAFF.length+1}" style="padding:0;height:4px;"></td></tr>`;
+  }
+  h+=`</tbody>`;
+  document.getElementById('m-table').innerHTML=h;
+}
+
 function computeOIL(){
   const today=new Date();
   const records=[];
-
   for(const event of PH_EVENTS){
     const earnedDate=new Date(event.dates[0]);
     if(earnedDate>today)continue;
     const deadline=new Date(earnedDate);
     deadline.setMonth(deadline.getMonth()+1);
-
     for(const staff of STAFF){
       let worked=false;
       for(const phDate of event.dates){
-        const phD=new Date(phDate);
-        const phMon=getMon(phD);const phWk=wk(phMon);
+        const phD=new Date(phDate);const phMon=getMon(phD);const phWk=wk(phMon);
         const data=cache[phWk];if(!data)continue;
         const dayIdx=phD.getDay()===0?6:phD.getDay()-1;
-        const day=DAYS[dayIdx];
-        const loc=data[`${staff}_${day}`];
+        const loc=data[`${staff}_${DAYS[dayIdx]}`];
         if(loc&&loc!=='OFF'&&loc!=='Leave'&&loc!==''){worked=true;break;}
       }
-      if(worked){
-        records.push({
-          id:`${staff}||${event.name}||${event.dates[0]}`,
-          staff,event:event.name,earnedDate,deadline,
-          oilDate:null,status:today>deadline?'overdue':'pending'
-        });
-      }
+      if(worked)records.push({id:`${staff}||${event.name}||${event.dates[0]}`,staff,event:event.name,earnedDate,deadline,oilDate:null,status:today>deadline?'overdue':'pending'});
     }
   }
-
-  // Collect all OIL entries from roster, sorted chronologically
   const allOIL=[];
   for(const[k,data] of Object.entries(cache)){
     const mon=new Date(k);
-    for(const staff of STAFF){
-      for(let i=0;i<7;i++){
-        if(data[`${staff}_${DAYS[i]}`]==='OIL'){
-          allOIL.push({staff,date:addD(mon,i)});
-        }
-      }
-    }
+    for(const staff of STAFF)for(let i=0;i<7;i++){if(data[`${staff}_${DAYS[i]}`]==='OIL')allOIL.push({staff,date:addD(mon,i)});}
   }
   allOIL.sort((a,b)=>a.date-b.date);
-
-  // Match OIL entries to earned records (earliest unmatched first)
-  for(const oilEntry of allOIL){
-    const match=records.find(r=>r.staff===oilEntry.staff&&r.oilDate===null&&oilEntry.date>r.earnedDate);
-    if(match){
-      match.oilDate=oilEntry.date;
-      match.status=oilEntry.date<today?'cleared':'scheduled';
-    }
-  }
-
+  for(const o of allOIL){const match=records.find(r=>r.staff===o.staff&&r.oilDate===null&&o.date>r.earnedDate);if(match){match.oilDate=o.date;match.status=o.date<new Date()?'cleared':'scheduled';}}
   return records;
 }
 
-// ── RENDER OIL ───────────────────────────────────────────────────────────────
 function renderOIL(){
   const today=new Date();
   const monthStart=new Date(today.getFullYear(),today.getMonth(),1);
   const records=computeOIL();
-
-  // Active: overdue, pending, scheduled, cleared-this-month (not dismissed)
-  const active=records.filter(r=>{
-    if(dismissed.has(r.id))return false;
-    if(r.status==='cleared'&&r.oilDate<monthStart)return false;
-    return true;
-  });
-
-  // Historical: cleared before this month (not dismissed)
-  const historical=records.filter(r=>{
-    if(dismissed.has(r.id))return false;
-    return r.status==='cleared'&&r.oilDate<monthStart;
-  });
-
+  const active=records.filter(r=>{if(dismissed.has(r.id))return false;if(r.status==='cleared'&&r.oilDate<monthStart)return false;return true;});
+  const historical=records.filter(r=>{if(dismissed.has(r.id))return false;return r.status==='cleared'&&r.oilDate<monthStart;});
   const order={overdue:0,pending:1,scheduled:2,cleared:3};
   active.sort((a,b)=>order[a.status]-order[b.status]);
   historical.sort((a,b)=>b.oilDate-a.oilDate);
-
   const panel=document.getElementById('oil-panel');
-  if(editMode)panel.classList.add('edit-active-mode');
-  else panel.classList.remove('edit-active-mode');
-
+  editMode?panel.classList.add('edit-active-mode'):panel.classList.remove('edit-active-mode');
   let h='';
-  if(active.length===0){
-    h='<div class="es">No active OIL obligations</div>';
-  } else {
-    for(const r of active){
-      const stCls={overdue:'s-o',pending:'s-p',scheduled:'s-s',cleared:'s-c'}[r.status];
-      let stLbl;
-      if(r.status==='overdue')stLbl=`Overdue · deadline was ${disp(r.deadline)}`;
-      else if(r.status==='pending')stLbl=`Pending · due by ${disp(r.deadline)}`;
-      else if(r.status==='scheduled')stLbl=`Scheduled ${disp(r.oilDate)}`;
-      else stLbl=`Cleared ${disp(r.oilDate)}`;
-      const canDel=(r.status==='overdue'||r.status==='pending');
-      h+=`<div class="oil-row">
-        <div class="oil-avatar">${initials(r.staff)}</div>
-        <div class="oil-main">
-          <div class="oil-name">${r.staff}</div>
-          <div class="oil-detail">${r.event}</div>
-        </div>
-        <div class="oil-right">
-          <span class="st ${stCls}">${stLbl}</span>
-          ${canDel?`<button class="del-btn" data-id="${r.id}" title="Dismiss this record">✕</button>`:''}
-        </div>
-      </div>`;
-    }
+  if(active.length===0)h='<div class="es">No active OIL obligations</div>';
+  else for(const r of active){
+    const stCls={overdue:'s-o',pending:'s-p',scheduled:'s-s',cleared:'s-c'}[r.status];
+    let stLbl;
+    if(r.status==='overdue')stLbl=`Overdue · deadline was ${disp(r.deadline)}`;
+    else if(r.status==='pending')stLbl=`Pending · due by ${disp(r.deadline)}`;
+    else if(r.status==='scheduled')stLbl=`Scheduled ${disp(r.oilDate)}`;
+    else stLbl=`Cleared ${disp(r.oilDate)}`;
+    const canDel=(r.status==='overdue'||r.status==='pending');
+    h+=`<div class="oil-row"><div class="oil-avatar">${initials(r.staff)}</div><div class="oil-main"><div class="oil-name">${r.staff}</div><div class="oil-detail">${r.event}</div></div><div class="oil-right"><span class="st ${stCls}">${stLbl}</span>${canDel?`<button class="del-btn" data-id="${r.id}" title="Dismiss">✕</button>`:''}</div></div>`;
   }
-
-  // Historical section
   h+=`<button class="hist-toggle" id="hist-btn">▸ History (${historical.length})</button>`;
   h+=`<div class="hist-section ${histOpen?'open':''}" id="hist-section">`;
-  if(historical.length===0){
-    h+='<div class="es" style="font-size:11px">No historical records</div>';
-  } else {
-    for(const r of historical){
-      h+=`<div class="hist-row">
-        <span class="hist-name">${r.staff} · ${r.event}</span>
-        <span class="hist-detail">Cleared ${disp(r.oilDate)}</span>
-      </div>`;
-    }
-  }
-  h+='</div>';
-
+  if(historical.length===0)h+='<div class="es" style="font-size:11px">No historical records</div>';
+  else for(const r of historical)h+=`<div class="hist-row"><span class="hist-name">${r.staff} · ${r.event}</span><span class="hist-detail">Cleared ${disp(r.oilDate)}</span></div>`;
+  h+=`</div>`;
   document.getElementById('oil-content').innerHTML=h;
-
-  // Wire delete buttons
-  document.querySelectorAll('.del-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>dismissOIL(btn.dataset.id));
-  });
-
-  // Wire history toggle
-  const histBtn=document.getElementById('hist-btn');
-  if(histBtn){
-    histBtn.addEventListener('click',()=>{
-      histOpen=!histOpen;
-      const sec=document.getElementById('hist-section');
-      if(sec)sec.classList.toggle('open',histOpen);
-      histBtn.textContent=(histOpen?'▾':'▸')+` History (${historical.length})`;
-    });
-  }
+  document.querySelectorAll('.del-btn').forEach(btn=>{btn.addEventListener('click',()=>dismissOIL(btn.dataset.id));});
+  const hb=document.getElementById('hist-btn');
+  if(hb)hb.addEventListener('click',()=>{histOpen=!histOpen;const s=document.getElementById('hist-section');if(s)s.classList.toggle('open',histOpen);hb.textContent=(histOpen?'▾':'▸')+` History (${historical.length})`;});
 }
 
-// ── RENDER COVERAGE ───────────────────────────────────────────────────────────
 function renderCov(){
   const k=wk(curWeek);const data=cache[k]||{};
   let h='';let sasDays=0;
   for(let i=0;i<7;i++){
     const d=addD(curWeek,i);const day=DAYS[i];const isWD=i<5;
     let ch=0,sa=0,of=0;
-    for(const s of STAFF){const v=data[`${s}_${day}`];if(v==='Chalet')ch++;if(v==='SAS')sa++;if(v==='Office')of++;}
+    for(const s of STAFF){const v=data[`${s}_${day}`];if(v==='Chalet')ch++;if(v==='SAS')sa++;if(v==='Office'||v==='WFH')of++;}
     if(sa>0&&isWD)sasDays++;
     const warns=[];
     if(ch===0)warns.push('Chalet — no cover');
@@ -498,7 +491,27 @@ function openEdit(staff,day){if(!editMode)return;const k=wk(curWeek);const{loc,n
 function closeEdit(){document.getElementById('edit-overlay').classList.add('hidden');editTarget=null;}
 async function doSave(){if(!editTarget)return;const loc=document.getElementById('loc-sel').value;const note=document.getElementById('note-inp').value.trim();await saveShift(editTarget.wk,editTarget.staff,editTarget.day,loc,note);closeEdit();}
 
-async function nav(delta){curWeek=addD(curWeek,delta*7);renderHdr();if(!cache[wk(curWeek)])await loadWk(curWeek);subWk(curWeek);renderGrid();renderCov();renderOIL();}
+async function nav(delta){
+  if(viewMode==='week'){
+    curWeek=addD(curWeek,delta*7);renderHdr();
+    if(!cache[wk(curWeek)])await loadWk(curWeek);
+    subWk(curWeek);renderGrid();renderCov();renderOIL();
+  } else {
+    curMonth=new Date(curMonth.getFullYear(),curMonth.getMonth()+delta,1);
+    renderHdr();await renderMonth();
+  }
+}
+
+async function switchView(mode){
+  viewMode=mode;
+  document.getElementById('week-btn').classList.toggle('active',mode==='week');
+  document.getElementById('month-btn').classList.toggle('active',mode==='month');
+  document.getElementById('week-view').style.display=mode==='week'?'':'none';
+  document.getElementById('month-view').style.display=mode==='month'?'':'none';
+  renderHdr();
+  if(mode==='month')await renderMonth();
+  else renderGrid();
+}
 
 async function init(){
   setSynced('saving');
@@ -509,6 +522,8 @@ async function init(){
   renderHdr();renderGrid();renderOIL();renderCov();
   document.getElementById('prev-btn').addEventListener('click',()=>nav(-1));
   document.getElementById('next-btn').addEventListener('click',()=>nav(1));
+  document.getElementById('week-btn').addEventListener('click',()=>switchView('week'));
+  document.getElementById('month-btn').addEventListener('click',()=>switchView('month'));
   document.getElementById('edit-btn').addEventListener('click',()=>{if(editMode){editMode=false;const btn=document.getElementById('edit-btn');btn.textContent='Edit';btn.classList.remove('active');renderGrid();renderOIL();}else{openPIN();}});
   document.getElementById('pin-cancel').addEventListener('click',closePIN);
   document.getElementById('pin-ok').addEventListener('click',checkPIN);
