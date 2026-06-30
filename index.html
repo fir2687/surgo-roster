@@ -205,10 +205,8 @@ select:focus,input:focus{border-color:#666;background:#fff;}
   <div id="activity-view" style="display:none;">
     <div class="act-head">
       <div class="act-month-label" id="act-month-label">Loading…</div>
-      <div class="act-legend">
-        <span class="act-leg"><span class="act-ld" style="background:#111"></span>Site Viewing</span>
-        <span class="act-leg"><span class="act-ld" style="background:#555"></span>Maintenance</span>
-      </div>
+      <div class="act-legend" id="act-legend"></div>
+      <button class="nav-btn" id="manage-types-btn" style="font-size:10px;padding:4px 10px;">Manage types</button>
     </div>
     <div class="cal-wrap">
       <div class="cal-grid" id="cal-grid"></div>
@@ -268,17 +266,45 @@ select:focus,input:focus{border-color:#666;background:#fff;}
     <div class="mtitle" id="act-title">Activities</div>
     <div id="act-list-box" style="max-height:220px;overflow-y:auto;margin-bottom:6px;"></div>
     <div class="flbl">Type</div>
-    <select id="act-type-sel">
-      <option value="Site Viewing">Site Viewing</option>
-      <option value="Maintenance">Maintenance</option>
-    </select>
-    <div class="flbl">Time</div>
-    <input type="text" id="act-time-inp" placeholder="e.g. 2:30 PM or 10-1pm" maxlength="30"/>
+    <select id="act-type-sel"></select>
+    <div class="flbl">Start time (for ordering)</div>
+    <div style="display:flex;gap:8px;">
+      <select id="act-hour-sel" style="flex:1;">
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+        <option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
+        <option value="9">9</option><option value="10" selected>10</option><option value="11">11</option><option value="12">12</option>
+      </select>
+      <select id="act-ampm-sel" style="flex:1;">
+        <option value="AM">AM</option><option value="PM" selected>PM</option>
+      </select>
+    </div>
+    <div class="flbl">Time label (optional, shown on calendar)</div>
+    <input type="text" id="act-time-inp" placeholder="e.g. 10 to 1pm or 2:30 PM" maxlength="30"/>
     <div class="flbl">Note</div>
     <input type="text" id="act-note-inp" placeholder="PIC, contact number, group, etc." maxlength="120"/>
     <div class="mactions">
       <button class="bsec" id="act-cancel">Close</button>
       <button class="bpri" id="act-add">Add activity</button>
+    </div>
+  </div>
+</div>
+
+<div id="types-overlay" class="overlay hidden">
+  <div class="modal">
+    <div class="mtitle">Manage activity types</div>
+    <div class="flbl">Type 1 (black)</div>
+    <input type="text" id="ty1-inp" maxlength="20"/>
+    <div class="flbl">Type 2 (grey)</div>
+    <input type="text" id="ty2-inp" maxlength="20"/>
+    <div class="flbl">Type 3 (blue)</div>
+    <input type="text" id="ty3-inp" maxlength="20"/>
+    <div class="flbl">Type 4 (amber)</div>
+    <input type="text" id="ty4-inp" maxlength="20"/>
+    <div class="flbl">Type 5 (fixed)</div>
+    <input type="text" value="Others" disabled style="opacity:0.5;"/>
+    <div class="mactions">
+      <button class="bsec" id="types-cancel">Cancel</button>
+      <button class="bpri" id="types-save">Save</button>
     </div>
   </div>
 </div>
@@ -342,11 +368,21 @@ let editMode=false;
 let editTarget=null;
 let unsub=null;
 let histOpen=false;
+const TYPE_SLOT_COLORS=[
+  {bg:'#111111',text:'#f5f5f5'},
+  {bg:'#555555',text:'#f5f5f5'},
+  {bg:'#1E40AF',text:'#DBEAFE'},
+  {bg:'#92400E',text:'#FEF3C7'},
+  {bg:'#777777',text:'#f0f0f0'}
+];
+const DEFAULT_TYPES={s1:'Site Viewing',s2:'Maintenance',s3:'',s4:''};
+
 let viewMode='week';
 let actMonth=new Date();
 let actCache={};
 let actEditDate=null;
-let actExpandedCell=null;
+let actEditingId=null;
+let actTypes={...DEFAULT_TYPES};
 
 function getMon(d){const r=new Date(d);const wd=r.getDay();r.setDate(r.getDate()+(wd===0?-6:1-wd));r.setHours(0,0,0,0);return r;}
 function wk(d){const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${dd}`;}
@@ -361,19 +397,58 @@ async function loadWk(mon){const k=wk(mon);const s=await getDoc(doc(db,'roster',
 function subWk(mon){if(unsub)unsub();unsub=onSnapshot(doc(db,'roster',wk(mon)),s=>{cache[wk(mon)]=s.exists()?s.data():{};renderGrid();renderCov();renderOIL();setSynced('synced');},()=>setSynced('error'));}
 async function saveShift(weekKey,staff,day,loc,note){setSynced('saving');await setDoc(doc(db,'roster',weekKey),{[`${staff}_${day}`]:loc,[`${staff}_${day}_note`]:note||''},{merge:true});}
 
+async function loadActTypes(){
+  const s=await getDoc(doc(db,'activityTypes','TSC'));
+  actTypes=s.exists()?{...DEFAULT_TYPES,...s.data()}:{...DEFAULT_TYPES};
+}
+async function saveActTypes(newTypes){
+  setSynced('saving');
+  actTypes={...actTypes,...newTypes};
+  await setDoc(doc(db,'activityTypes','TSC'),actTypes,{merge:true});
+  setSynced('synced');
+}
+function getActiveSlots(){
+  const slots=[];
+  if(actTypes.s1)slots.push({name:actTypes.s1,color:TYPE_SLOT_COLORS[0]});
+  if(actTypes.s2)slots.push({name:actTypes.s2,color:TYPE_SLOT_COLORS[1]});
+  if(actTypes.s3)slots.push({name:actTypes.s3,color:TYPE_SLOT_COLORS[2]});
+  if(actTypes.s4)slots.push({name:actTypes.s4,color:TYPE_SLOT_COLORS[3]});
+  slots.push({name:'Others',color:TYPE_SLOT_COLORS[4]});
+  return slots;
+}
+function refreshTypeOptions(){
+  const sel=document.getElementById('act-type-sel');
+  const slots=getActiveSlots();
+  sel.innerHTML=slots.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');
+  const legend=document.getElementById('act-legend');
+  if(legend)legend.innerHTML=slots.map(s=>`<span class="act-leg"><span class="act-ld" style="background:${s.color.bg}"></span>${s.name}</span>`).join('');
+}
+
 async function loadActMonth(d){
   const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
   const s=await getDoc(doc(db,'activities',key));
   actCache[key]=s.exists()?(s.data().items||{}):{};
 }
 function actMonthKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
-async function addActivity(dateIso,type,time,note){
+function sortMinutes(hour,ampm){let h=parseInt(hour)%12;if(ampm==='PM')h+=12;return h*60;}
+async function addActivity(dateIso,type,color,sortMin,time,note){
   setSynced('saving');
   const d=new Date(dateIso);
   const mk=actMonthKey(d);
   if(!actCache[mk])actCache[mk]={};
   if(!actCache[mk][dateIso])actCache[mk][dateIso]=[];
-  actCache[mk][dateIso].push({type,time,note,id:Date.now().toString(36)+Math.random().toString(36).slice(2,6)});
+  actCache[mk][dateIso].push({type,bg:color.bg,text:color.text,sortMin,time,note,id:Date.now().toString(36)+Math.random().toString(36).slice(2,6)});
+  await setDoc(doc(db,'activities',mk),{items:actCache[mk]},{merge:true});
+  setSynced('synced');
+}
+async function updateActivity(dateIso,actId,type,color,sortMin,time,note){
+  setSynced('saving');
+  const d=new Date(dateIso);
+  const mk=actMonthKey(d);
+  if(actCache[mk]&&actCache[mk][dateIso]){
+    const idx=actCache[mk][dateIso].findIndex(a=>a.id===actId);
+    if(idx>-1)actCache[mk][dateIso][idx]={...actCache[mk][dateIso][idx],type,bg:color.bg,text:color.text,sortMin,time,note};
+  }
   await setDoc(doc(db,'activities',mk),{items:actCache[mk]},{merge:true});
   setSynced('synced');
 }
@@ -512,7 +587,7 @@ async function renderActivities(){
     const isWk=cellDate.getDay()===0||cellDate.getDay()===6;
     const ph=PH_LABELS[cIso];
     const today=isToday(cellDate);
-    const dayActs=(items[cIso]||[]).slice().sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+    const dayActs=(items[cIso]||[]).slice().sort((a,b)=>(a.sortMin??0)-(b.sortMin??0));
 
     const cls=['cal-cell'];
     if(!inMonth)cls.push('other-month');
@@ -523,9 +598,8 @@ async function renderActivities(){
     let chipsHtml='';
     const maxShow=2;
     dayActs.slice(0,maxShow).forEach(a=>{
-      const cc=a.type==='Maintenance'?'chip-mt':'chip-sv';
       const tlabel=a.time?`${a.time} · `:'';
-      chipsHtml+=`<span class="act-chip ${cc}" data-date="${cIso}">${tlabel}${a.type}</span>`;
+      chipsHtml+=`<span class="act-chip" style="background:${a.bg};color:${a.text};" data-date="${cIso}">${tlabel}${a.type}</span>`;
     });
     if(dayActs.length>maxShow){
       chipsHtml+=`<span class="more-chip" data-date="${cIso}">+${dayActs.length-maxShow} more</span>`;
@@ -558,10 +632,9 @@ function expandCell(cell,dateIso,acts){
   let h=`<div class="cal-daynum-row"><span class="cal-daynum">${new Date(dateIso).getDate()}</span></div>`;
   const ph=PH_LABELS[dateIso];
   if(ph)h+=`<span class="cal-ph-label">${ph}</span>`;
-  acts.slice().sort((a,b)=>(a.time||'').localeCompare(b.time||'')).forEach(a=>{
-    const cc=a.type==='Maintenance'?'chip-mt':'chip-sv';
+  acts.slice().sort((a,b)=>(a.sortMin??0)-(b.sortMin??0)).forEach(a=>{
     const tlabel=a.time?`${a.time} · `:'';
-    h+=`<span class="act-chip ${cc}">${tlabel}${a.type}</span>`;
+    h+=`<span class="act-chip" style="background:${a.bg};color:${a.text};">${tlabel}${a.type}</span>`;
   });
   cell.innerHTML=h;
   cell.addEventListener('click',()=>openActModal(dateIso),{once:true});
@@ -569,14 +642,18 @@ function expandCell(cell,dateIso,acts){
 
 function openActModal(dateIso){
   actEditDate=dateIso;
+  actEditingId=null;
   const d=new Date(dateIso);
   document.getElementById('act-title').textContent=`${DN[d.getDay()===0?6:d.getDay()-1]} ${disp(d)}`;
   const mk=actMonthKey(d);
   const acts=(actCache[mk]&&actCache[mk][dateIso])||[];
   renderActList(acts,dateIso);
-  document.getElementById('act-type-sel').value='Site Viewing';
+  refreshTypeOptions();
+  document.getElementById('act-hour-sel').value='10';
+  document.getElementById('act-ampm-sel').value='AM';
   document.getElementById('act-time-inp').value='';
   document.getElementById('act-note-inp').value='';
+  document.getElementById('act-add').textContent='Add activity';
   document.getElementById('act-overlay').classList.remove('hidden');
   setTimeout(()=>document.getElementById('act-time-inp').focus(),50);
 }
@@ -585,16 +662,16 @@ function renderActList(acts,dateIso){
   const box=document.getElementById('act-list-box');
   if(acts.length===0){box.innerHTML='<div class="es" style="padding:4px 0;">No activities yet</div>';return;}
   let h='';
-  acts.slice().sort((a,b)=>(a.time||'').localeCompare(b.time||'')).forEach(a=>{
-    const cc=a.type==='Maintenance'?'chip-mt':'chip-sv';
+  acts.slice().sort((a,b)=>(a.sortMin??0)-(b.sortMin??0)).forEach(a=>{
     h+=`<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid #f5f5f5;">
-      <span class="act-chip ${cc}" style="flex-shrink:0;">${a.time?a.time+' · ':''}${a.type}</span>
+      <span class="act-chip" style="background:${a.bg};color:${a.text};flex-shrink:0;">${a.time?a.time+' · ':''}${a.type}</span>
       <span style="font-size:11px;color:#666;flex:1;">${a.note||''}</span>
+      <button class="del-btn" style="display:block;" data-editid="${a.id}" title="Edit">✎</button>
       <button class="del-btn" style="display:block;" data-actid="${a.id}" title="Delete">✕</button>
     </div>`;
   });
   box.innerHTML=h;
-  box.querySelectorAll('.del-btn').forEach(btn=>{
+  box.querySelectorAll('[data-actid]').forEach(btn=>{
     btn.addEventListener('click',async()=>{
       await deleteActivity(dateIso,btn.dataset.actid);
       const mk=actMonthKey(new Date(dateIso));
@@ -602,17 +679,64 @@ function renderActList(acts,dateIso){
       renderActivities();
     });
   });
+  box.querySelectorAll('[data-editid]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const mk=actMonthKey(new Date(dateIso));
+      const item=(actCache[mk][dateIso]||[]).find(a=>a.id===btn.dataset.editid);
+      if(!item)return;
+      actEditingId=item.id;
+      refreshTypeOptions();
+      document.getElementById('act-type-sel').value=item.type;
+      const h12=item.sortMin>=720?(item.sortMin/60-12)||12:item.sortMin/60||12;
+      document.getElementById('act-hour-sel').value=Math.round(h12)||10;
+      document.getElementById('act-ampm-sel').value=item.sortMin>=720?'PM':'AM';
+      document.getElementById('act-time-inp').value=item.time||'';
+      document.getElementById('act-note-inp').value=item.note||'';
+      document.getElementById('act-add').textContent='Save changes';
+    });
+  });
 }
 
-function closeActModal(){document.getElementById('act-overlay').classList.add('hidden');actEditDate=null;}
+function closeActModal(){document.getElementById('act-overlay').classList.add('hidden');actEditDate=null;actEditingId=null;}
+
+function openTypesModal(){
+  document.getElementById('ty1-inp').value=actTypes.s1||'';
+  document.getElementById('ty2-inp').value=actTypes.s2||'';
+  document.getElementById('ty3-inp').value=actTypes.s3||'';
+  document.getElementById('ty4-inp').value=actTypes.s4||'';
+  document.getElementById('types-overlay').classList.remove('hidden');
+}
+function closeTypesModal(){document.getElementById('types-overlay').classList.add('hidden');}
+async function saveTypesModal(){
+  const newTypes={
+    s1:document.getElementById('ty1-inp').value.trim(),
+    s2:document.getElementById('ty2-inp').value.trim(),
+    s3:document.getElementById('ty3-inp').value.trim(),
+    s4:document.getElementById('ty4-inp').value.trim()
+  };
+  await saveActTypes(newTypes);
+  refreshTypeOptions();
+  closeTypesModal();
+}
 
 async function submitActivity(){
   if(!actEditDate)return;
-  const type=document.getElementById('act-type-sel').value;
+  const typeName=document.getElementById('act-type-sel').value;
+  const slots=getActiveSlots();
+  const slot=slots.find(s=>s.name===typeName)||slots[slots.length-1];
+  const hour=document.getElementById('act-hour-sel').value;
+  const ampm=document.getElementById('act-ampm-sel').value;
+  const sortMin=sortMinutes(hour,ampm);
   const time=document.getElementById('act-time-inp').value.trim();
   const note=document.getElementById('act-note-inp').value.trim();
   if(!time&&!note)return;
-  await addActivity(actEditDate,type,time,note);
+  if(actEditingId){
+    await updateActivity(actEditDate,actEditingId,typeName,slot.color,sortMin,time,note);
+    actEditingId=null;
+    document.getElementById('act-add').textContent='Add activity';
+  } else {
+    await addActivity(actEditDate,typeName,slot.color,sortMin,time,note);
+  }
   document.getElementById('act-time-inp').value='';
   document.getElementById('act-note-inp').value='';
   const mk=actMonthKey(new Date(actEditDate));
@@ -741,6 +865,7 @@ async function switchView(mode){
   else if(mode==='month'){renderHdr();await renderMonth();}
   else if(mode==='activity'){
     document.getElementById('week-label').textContent='';
+    refreshTypeOptions();
     await renderActivities();
   }
 }
@@ -749,6 +874,7 @@ async function init(){
   setSynced('saving');
   await seedIfEmpty();
   await loadDismissed();
+  await loadActTypes();
   for(const k of Object.keys(MIG))await loadWk(new Date(k));
   subWk(curWeek);
   renderHdr();renderGrid();renderOIL();renderCov();
@@ -760,6 +886,9 @@ async function init(){
   document.getElementById('act-cancel').addEventListener('click',closeActModal);
   document.getElementById('act-add').addEventListener('click',submitActivity);
   document.getElementById('act-note-inp').addEventListener('keydown',e=>{if(e.key==='Enter')submitActivity();if(e.key==='Escape')closeActModal();});
+  document.getElementById('manage-types-btn').addEventListener('click',openTypesModal);
+  document.getElementById('types-cancel').addEventListener('click',closeTypesModal);
+  document.getElementById('types-save').addEventListener('click',saveTypesModal);
   document.getElementById('edit-btn').addEventListener('click',()=>{if(editMode){editMode=false;const btn=document.getElementById('edit-btn');btn.textContent='Edit';btn.classList.remove('active');renderGrid();renderOIL();}else{openPIN();}});
   document.getElementById('pin-cancel').addEventListener('click',closePIN);
   document.getElementById('pin-ok').addEventListener('click',checkPIN);
